@@ -2,30 +2,11 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>kenoo</title>
+  <title>Kenoo</title>
   <style>
     .quiz-container {
       position: relative;
       flex: 1;
-    }
-
-    .fullscreen-btn {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      z-index: 10;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      padding: 6px 10px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
     }
 
     .quiz-btn {
@@ -36,17 +17,26 @@
       background-color: #007bff;
       color: white;
       cursor: pointer;
+      font-size: 16px;
     }
 
     #btn-container {
       display: flex;
       gap: 10px;
       margin: 20px 0;
+      flex-wrap: wrap;
+    }
+
+    iframe {
+      border: none;
     }
   </style>
 </head>
 <body>
-  <div id="container" style="min-height:100px;"></div>
+  <div id="container">
+    <h2>Quiz seç:</h2>
+    <div id="btn-container"></div>
+  </div>
 
   <script>
     const allowedIPs = [
@@ -59,45 +49,43 @@
       "94.20.42.211"
     ];
 
-    async function checkIP() {
-      try {
-        const res = await fetch('https://api.ipify.org?format=json');
-        const data = await res.json();
-        const userIP = data.ip;
+    const links = [
+      "https://quizizz.com/embed/quiz/683dddfd79bab9c70d96170f",
+      "https://quizizz.com/embed/quiz/683dde151f8214ac74f7703d",
+      "https://quizizz.com/embed/quiz/683dde314708a5aad48cb67f"
+    ];
 
-        if (allowedIPs.includes(userIP)) {
-          showButtons();
-        } else {
-          document.getElementById("container").innerHTML = "<p style='color:red;'>Reddol burdan.</p>";
-        }
-      } catch (err) {
-        console.error("Xəta baş verdi:", err);
-      }
+    function createButton(text, func) {
+      const btn = document.createElement("button");
+      btn.className = "quiz-btn";
+      btn.textContent = text;
+      btn.onclick = func;
+      document.getElementById("btn-container").appendChild(btn);
+    }
+
+    function checkIP() {
+      fetch('https://api.ipify.org?format=json')
+        .then(res => res.json())
+        .then(data => {
+          if (allowedIPs.includes(data.ip)) {
+            showButtons();
+          } else {
+            document.getElementById("container").innerHTML = "<p style='color:red;'>Reddol burdan.</p>";
+          }
+        })
+        .catch(err => {
+          console.error("Xəta baş verdi:", err);
+        });
     }
 
     function showButtons() {
-      const links = [
-        "https://quizizz.com/embed/quiz/683dddfd79bab9c70d96170f",
-        "https://quizizz.com/embed/quiz/683dde151f8214ac74f7703d",
-        "https://quizizz.com/embed/quiz/683dde314708a5aad48cb67f"
-      ];
-
-      const container = document.getElementById("container");
-      const btnContainer = document.createElement("div");
-      btnContainer.id = "btn-container";
-
-      links.forEach((link, index) => {
-        const btn = document.createElement("button");
-        btn.className = "quiz-btn";
-        btn.textContent = (index + 1).toString();
-        btn.onclick = () => openQuiz(link);
-        btnContainer.appendChild(btn);
-      });
-
-      container.appendChild(btnContainer);
+      createButton("2. Yol (sandbox fullscreen)", () => openQuiz2(links[0]));
+      createButton("3. Yol (tam ekran iframe)", () => openQuiz3(links[1]));
+      createButton("4. Yol (istifadəçi klikindən sonra)", () => openQuiz4(links[2]));
     }
 
-    function openQuiz(link) {
+    // ✅ Yol 2: sandbox atributu ilə fullscreen iframe
+    function openQuiz2(link) {
       const existingIframe = document.getElementById("fullscreen-quiz");
       if (existingIframe) existingIframe.remove();
 
@@ -105,25 +93,65 @@
       iframe.src = link;
       iframe.id = "fullscreen-quiz";
       iframe.allowFullscreen = true;
+      iframe.setAttribute("sandbox", "allow-scripts allow-same-origin allow-presentation allow-popups allow-forms");
+      Object.assign(iframe.style, {
+        position: "fixed",
+        top: "0",
+        left: "0",
+        width: "100vw",
+        height: "100vh",
+        zIndex: "9999"
+      });
       document.body.appendChild(iframe);
-
-      if (iframe.requestFullscreen) iframe.requestFullscreen();
-      else if (iframe.webkitRequestFullscreen) iframe.webkitRequestFullscreen();
-      else if (iframe.msRequestFullscreen) iframe.msRequestFullscreen();
-
-      document.addEventListener("fullscreenchange", handleExit);
-      document.addEventListener("webkitfullscreenchange", handleExit);
-      document.addEventListener("msfullscreenchange", handleExit);
     }
 
-    function handleExit() {
-      const iframe = document.getElementById("fullscreen-quiz");
-      if (!document.fullscreenElement && iframe) {
-        iframe.remove();
-        document.removeEventListener("fullscreenchange", handleExit);
-        document.removeEventListener("webkitfullscreenchange", handleExit);
-        document.removeEventListener("msfullscreenchange", handleExit);
-      }
+    // ✅ Yol 3: fullscreen olmadan sadəcə iframe
+    function openQuiz3(link) {
+      const existingIframe = document.getElementById("fullscreen-quiz");
+      if (existingIframe) existingIframe.remove();
+
+      const iframe = document.createElement("iframe");
+      iframe.src = link;
+      iframe.id = "fullscreen-quiz";
+      Object.assign(iframe.style, {
+        position: "fixed",
+        top: "0",
+        left: "0",
+        width: "100vw",
+        height: "100vh",
+        zIndex: "9999"
+      });
+      iframe.allowFullscreen = true;
+
+      document.body.innerHTML = "";
+      document.body.appendChild(iframe);
+    }
+
+    // ✅ Yol 4: istifadəçi klikindən sonra iframe başlasın
+    function openQuiz4(link) {
+      const container = document.getElementById("container");
+      container.innerHTML = `
+        <button onclick="startQuiz4()" class="quiz-btn">Başla (Yol 4)</button>
+      `;
+
+      window.startQuiz4 = () => {
+        const iframe = document.createElement("iframe");
+        iframe.src = link;
+        iframe.id = "fullscreen-quiz";
+        iframe.allowFullscreen = true;
+        iframe.setAttribute("sandbox", "allow-scripts allow-same-origin allow-presentation allow-popups");
+        Object.assign(iframe.style, {
+          position: "fixed",
+          top: "0",
+          left: "0",
+          width: "100vw",
+          height: "100vh",
+          zIndex: "9999"
+        });
+
+        document.body.innerHTML = "";
+        document.body.appendChild(iframe);
+      };
     }
 
     window.onload = checkIP;
