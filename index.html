@@ -2,19 +2,8 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>suallar</title>
-  <style>
-    /* Koda baxanlar üçün “min-height” göstərir ki, yer boş qalmasın */
-    #container {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      min-height: 635px;
-    }
-  </style>
+  <title>keno</title>
   <script>
-    // 1) Əvvəlcə “icazə verilən IP-lər” massivini saxlayırıq:
     const allowedIPs = [
       "37.114.162.55",
       "45.15.43.70",
@@ -25,89 +14,48 @@
       "94.20.42.211"
     ];
 
-    // 2) Base64-də gizlətdiyimiz Quizizz iframe src-ləri:
-    const encryptedQuizSources = [
-      // atob("aHR0cHM6Ly9xdWl6aXp6LmNvbS9lbWJlZC9xdWl6LzY4M2RkZGRmZDc5YmFiOWM3MGQ5NjE3MGY=")
-      "aHR0cHM6Ly9xdWl6aXp6LmNvbS9lbWJlZC9xdWl6LzY4M2RkZGRmZDc5YmFiOWM3MGQ5NjE3MGY=",
-      // atob("aHR0cHM6Ly9xdWl6aXp6LmNvbS9lbWJlZC9xdWl6LzY4M2RkZGUxNTFmODIxNGFjNzRmNzcwM2Q=")
-      "aHR0cHM6Ly9xdWl6aXp6LmNvbS9lbWJlZC9xdWl6LzY4M2RkZGUxNTFmODIxNGFjNzRmNzcwM2Q=",
-      // atob("aHR0cHM6Ly9xdWl6aXp6LmNvbS9lbWJlZC9xdWl6LzY4M2RkZGUzMTQ3MDhhNWFhZDQ4Y2I2N2Y=")
-      "aHR0cHM6Ly9xdWl6aXp6LmNvbS9lbWJlZC9xdWl6LzY4M2RkZGUzMTQ3MDhhNWFhZDQ4Y2I2N2Y="
-    ];
-
-    // DevTools sayğacı üçün qlobal dəyişənlər:
-    let devtoolsCounter = 0;
-    const DEVTOOLS_THRESHOLD = 100; // 100 dəfə inspect edəndən sonra iframe-ləri göstər
-
-    // Quiz-ləri DOM-a əlavə edən funksiya:
-    function revealQuizzes() {
-      const container = document.getElementById("container");
-      // Əgər artıq əlavə olunubsa, yenidən əlavə etməsin:
-      if (container.getAttribute("data-shown") === "yes") return;
-
-      // Base64-dəki URL-ləri deşifrə edib <iframe> şəklində DOM-a yapışdırırıq:
-      encryptedQuizSources.forEach(encodedSrc => {
-        const realSrc = atob(encodedSrc);
-        const iframeEl = document.createElement("iframe");
-        iframeEl.src = realSrc;
-        iframeEl.title = " - Quizizz";
-        iframeEl.setAttribute("style", "flex:1;");
-        iframeEl.frameBorder = "0";
-        iframeEl.allowFullscreen = true;
-        container.appendChild(iframeEl);
-      });
-
-      // “Explore more” linkini də əlavə edək:
-      const moreLink = document.createElement("a");
-      moreLink.href = "https://quizizz.com/admin?source=embedFrame";
-      moreLink.target = "_blank";
-      moreLink.textContent = "Explore more at Quizizz.";
-      container.appendChild(moreLink);
-
-      container.setAttribute("data-shown", "yes");
-    }
-
-    // DevTools açılma deteksiyası: outerWidth–innerWidth / outerHeight–innerHeight fərqi
-    function detectDevTools() {
-      const widthDiff  = window.outerWidth - window.innerWidth > 160;
-      const heightDiff = window.outerHeight - window.innerHeight > 160;
-      // 160 piksel pragı bir çox brauzerdə konsol açıldığı zaman scrollbar mərkəzini tutmaq üçün yetərlidir
-      if (widthDiff || heightDiff) {
-        devtoolsCounter++;
-        // Əgər artıqlama sayça çatdısa, quiz-ləri göstər:
-        if (devtoolsCounter >= DEVTOOLS_THRESHOLD) {
-          clearInterval(devToolsInterval);
-          revealQuizzes();
-        }
-      }
-    }
-
-    // IP yoxlama + DevTools-a nəzarət:
-    window.onload = async function() {
+    async function checkIP() {
       try {
-        // 1) İstifadəçi IP-sini al:
         const res = await fetch('https://api.ipify.org?format=json');
         const data = await res.json();
         const userIP = data.ip;
 
         if (allowedIPs.includes(userIP)) {
-          // 2) DevTools yoxlama intervalını işə sal:
-          devToolsInterval = setInterval(detectDevTools, 1000);
-          // Əgər heç vaxt inspect açmazsa, istifadəçi quiz-ləri görə bilməyəcək.
-          // Lakin test üçün, məsələn, 5-10 saniyə sonra avtomatik açılsın deyib yoxlamaq olar:
-          // setTimeout(() => revealQuizzes(), 30000);
+          document.getElementById("container").innerHTML = `
+            <div style="width:100%;display:flex;flex-direction:column;gap:8px;min-height:635px;">
+              <iframe src="https://quizizz.com/embed/quiz/683dddfd79bab9c70d96170f"
+                      title=" - Quizizz"
+                      style="flex:1;"
+                      frameBorder="0"
+                      allowfullscreen>
+              </iframe>
+              <iframe src="https://quizizz.com/embed/quiz/683dde151f8214ac74f7703d"
+                      title=" - Quizizz"
+                      style="flex:1;"
+                      frameBorder="0"
+                      allowfullscreen>
+              </iframe>
+              <iframe src="https://quizizz.com/embed/quiz/683dde314708a5aad48cb67f"
+                      title=" - Quizizz"
+                      style="flex:1;"
+                      frameBorder="0"
+                      allowfullscreen>
+              </iframe>
+              <a href="https://quizizz.com/admin?source=embedFrame" target="_blank">Explore more at Quizizz.</a>
+            </div>
+          `;
         } else {
-          // İcazə verilməyən IP üçün heç nə göstərilməyəcək
-          document.getElementById("container").innerHTML = "";
+          document.getElementById("container").innerHTML = ""; // İcazə olmayan IP üçün heç nə göstərilməyəcək
         }
       } catch (err) {
-        console.error("IP alına bilmədi:", err);
+        console.error("Xəta baş verdi:", err);
       }
     }
+
+    window.onload = checkIP;
   </script>
 </head>
 <body>
-  <h2>IP və DevTools Şərtlərinə Cavab Verənlər Üçün Quizlər</h2>
-  <div id="container"></div>
+  <div id="container" style="min-height:100px;"></div>
 </body>
 </html>
