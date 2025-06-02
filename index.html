@@ -2,35 +2,43 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>kenoo</title>
+  <title>IP Güvənliyi ilə Quiz</title>
   <style>
-    .quiz-container {
-      position: relative;
-      flex: 1;
+    .btn-container {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
     }
 
-    .fullscreen-btn {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      z-index: 10;
-      background-color: #4CAF50;
+    .quiz-btn {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #3498db;
       color: white;
       border: none;
-      padding: 6px 10px;
-      border-radius: 4px;
+      border-radius: 6px;
       cursor: pointer;
     }
 
-    iframe {
+    .quiz-container {
+      position: relative;
       width: 100%;
       height: 100%;
+    }
+
+    iframe {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
       border: none;
+      z-index: 999;
     }
   </style>
 </head>
 <body>
-  <div id="container" style="min-height:100px;">Yoxlanılır...</div>
+  <div id="container" style="min-height:100px;"></div>
 
   <script>
     const allowedIPs = [
@@ -43,65 +51,80 @@
       "94.20.42.211"
     ];
 
-    async function getIP() {
+    async function checkIP() {
       try {
         const res = await fetch('https://api.ipify.org?format=json');
         const data = await res.json();
-        return data.ip;
-      } catch (e) {
-        console.error("IP almaq mümkün olmadı:", e);
-        return null;
+        const userIP = data.ip;
+
+        if (allowedIPs.includes(userIP)) {
+          showButtons();
+        } else {
+          document.getElementById("container").innerHTML = "<p style='color:red;'>İcazəsiz giriş.</p>";
+        }
+      } catch (err) {
+        console.error("Xəta baş verdi:", err);
       }
     }
 
-    function createQuizFrame(src) {
-      const id = `iframe-${Math.random().toString(36).substr(2, 9)}`;
-      return `
-        <div class="quiz-container">
-          <button class="fullscreen-btn" onclick="openFullscreen('${id}')">Tam Ekran</button>
-          <iframe id="${id}" src="${src}" allowfullscreen></iframe>
-        </div>
-      `;
+    function showButtons() {
+      const quizzes = [
+        "https://quizizz.com/embed/quiz/683dddfd79bab9c70d96170f",
+        "https://quizizz.com/embed/quiz/683dde151f8214ac74f7703d",
+        "https://quizizz.com/embed/quiz/683dde314708a5aad48cb67f"
+      ];
+
+      const container = document.getElementById("container");
+      const btnContainer = document.createElement("div");
+      btnContainer.className = "btn-container";
+
+      quizzes.forEach((link, index) => {
+        const btn = document.createElement("button");
+        btn.className = "quiz-btn";
+        btn.textContent = (index + 1).toString();
+        btn.onclick = () => openQuiz(link);
+        btnContainer.appendChild(btn);
+      });
+
+      container.appendChild(btnContainer);
     }
 
-    function openFullscreen(id) {
-      const iframe = document.getElementById(id);
-      if (iframe.requestFullscreen) iframe.requestFullscreen();
-      else if (iframe.webkitRequestFullscreen) iframe.webkitRequestFullscreen();
-      else if (iframe.msRequestFullscreen) iframe.msRequestFullscreen();
+    function openQuiz(link) {
+      // Əvvəlki iframe varsa sil
+      const oldFrame = document.getElementById("fullscreen-quiz");
+      if (oldFrame) oldFrame.remove();
+
+      const iframe = document.createElement("iframe");
+      iframe.src = link;
+      iframe.id = "fullscreen-quiz";
+      document.body.appendChild(iframe);
+
+      // Tam ekrana keç
+      if (iframe.requestFullscreen) {
+        iframe.requestFullscreen();
+      } else if (iframe.webkitRequestFullscreen) {
+        iframe.webkitRequestFullscreen();
+      } else if (iframe.msRequestFullscreen) {
+        iframe.msRequestFullscreen();
+      }
+
+      // Tam ekrandan çıxışa qulaq as
+      document.addEventListener("fullscreenchange", handleExit);
+      document.addEventListener("webkitfullscreenchange", handleExit);
+      document.addEventListener("msfullscreenchange", handleExit);
     }
 
-    async function checkAndRender() {
-      const ip = await getIP();
-      if (!ip) {
-        document.getElementById("container").innerText = "IP yoxlanıla bilmədi.";
-        return;
-      }
-
-      if (allowedIPs.includes(ip)) {
-        localStorage.setItem("ip_access_granted", "1");
-        document.getElementById("container").innerHTML = `
-          <div style="width:100%;display:flex;flex-direction:column;gap:8px;min-height:635px;">
-            ${createQuizFrame("https://quizizz.com/embed/quiz/683dddfd79bab9c70d96170f")}
-            ${createQuizFrame("https://quizizz.com/embed/quiz/683dde151f8214ac74f7703d")}
-            ${createQuizFrame("https://quizizz.com/embed/quiz/683dde314708a5aad48cb67f")}
-            <a href="https://quizizz.com/admin?source=embedFrame" target="_blank">Explore more at Quizizz.</a>
-          </div>
-        `;
-      } else {
-        localStorage.removeItem("ip_access_granted");
-        document.getElementById("container").innerHTML = `<p style="color:red;">Bu IP ilə girişə icazə verilmir.</p>`;
+    function handleExit() {
+      const iframe = document.getElementById("fullscreen-quiz");
+      if (!document.fullscreenElement && iframe) {
+        iframe.remove();
+        document.removeEventListener("fullscreenchange", handleExit);
+        document.removeEventListener("webkitfullscreenchange", handleExit);
+        document.removeEventListener("msfullscreenchange", handleExit);
       }
     }
 
-    // Səhifə yüklənəndə yoxla
-    window.onload = () => {
-      if (localStorage.getItem("ip_access_granted") === "1") {
-        checkAndRender(); // Refresh edilsə belə yoxlamanı davam etdir
-      } else {
-        checkAndRender();
-      }
-    };
+    window.onload = checkIP;
   </script>
 </body>
 </html>
