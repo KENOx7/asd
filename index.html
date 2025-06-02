@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>IP Güvənliyi</title>
   <style>
     .quiz-container {
@@ -14,7 +14,7 @@
       top: 10px;
       right: 10px;
       z-index: 10;
-      background-color: #4caf50;
+      background-color: #4CAF50;
       color: white;
       border: none;
       padding: 6px 10px;
@@ -59,23 +59,6 @@
       "94.20.42.211"
     ];
 
-    // Quiz URL-lərinin base64 ilə kodlanmış versiyaları
-    const encodedLinks = [
-      "aHR0cHM6Ly9xdWl6aXp6LmNvbS9lbWJlZC9xdWl6LzY4M2RkZGRmZDc5YmFiOWM3MGQ5NjE3MGY=",
-      "aHR0cHM6Ly9xdWl6aXp6LmNvbS9lbWJlZC9xdWl6LzY4M2RkZTE1MWY4MjE0YWM3NGY3NzAzZA==",
-      "aHR0cHM6Ly9xdWl6aXp6LmNvbS9lbWJlZC9xdWl6LzY4M2RkZTMxNDcwOGE1YWFkNDhjYjY3Zg=="
-    ];
-
-    // Base64 kodunu decode edən funksiya
-    function decodeBase64(str) {
-      return decodeURIComponent(
-        atob(str)
-          .split('')
-          .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-          .join('')
-      );
-    }
-
     async function checkIP() {
       try {
         const res = await fetch('https://api.ipify.org?format=json');
@@ -93,7 +76,11 @@
     }
 
     function showButtons() {
-      const links = encodedLinks.map(decodeBase64);
+      const links = [
+        "https://quizizz.com/embed/quiz/683dddfd79bab9c70d96170f",
+        "https://quizizz.com/embed/quiz/683dde151f8214ac74f7703d",
+        "https://quizizz.com/embed/quiz/683dde314708a5aad48cb67f"
+      ];
 
       const container = document.getElementById("container");
       const btnContainer = document.createElement("div");
