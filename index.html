@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Giriş yoxlanılır...</title>
+  <script>
+    // İcazə verilən IP
+    const allowedIP = "37.114.162.55";
+
+    // IP yoxlayan funksiya
+    async function checkIP() {
+      try {
+        // İstifadəçinin IP ünvanını almaq üçün API
+        const response = await fetch('https://api.ipify.org?format=json');
+        const data = await response.json();
+        const userIP = data.ip;
+
+        // IP-ni yoxlayırıq
+        if (userIP === allowedIP) {
+          document.getElementById("content").style.display = "block";
+        } else {
+          document.body.innerHTML = "<h1 style='color:red;'>Giriş icazəsi verilmir.</h1>";
+        }
+      } catch (error) {
+        document.body.innerHTML = "<h1>Xəta baş verdi. Zəhmət olmasa sonra yenidən yoxlayın.</h1>";
+        console.error("IP yoxlama zamanı xəta:", error);
+      }
+    }
+
+    // Səhifə yükləndikdə IP yoxlansın
+    window.onload = checkIP;
+  </script>
+</head>
+<body>
+  <div id="content" style="display:none;">
+    <h1>Sayta xoş gəlmisiniz!</h1>
+    <p>Bu səhifə yalnız 37.114.162.55 IP ünvanı üçün görünür.</p>
+  </div>
+</body>
+</html>
