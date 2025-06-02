@@ -19,10 +19,31 @@
       gap: 10px;
       margin: 20px 0;
     }
+
+    #quiz-frame {
+      width: 100%;
+      height: 80vh;
+      border: none;
+      display: none;
+      margin-top: 20px;
+    }
+
+    #close-btn {
+      display: none;
+      margin-top: 10px;
+      padding: 8px 12px;
+      background-color: red;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
   <div id="container" style="min-height:100px;"></div>
+  <iframe id="quiz-frame" allowfullscreen></iframe>
+  <button id="close-btn" onclick="closeQuiz()">X</button>
 
   <script>
     const allowedIPs = [
@@ -75,98 +96,33 @@
     }
 
     function openQuiz(link) {
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      const iframe = document.getElementById("quiz-frame");
+      const closeBtn = document.getElementById("close-btn");
 
-      const existingIframe = document.getElementById("fullscreen-quiz");
-      if (existingIframe) existingIframe.remove();
-
-      const existingClose = document.getElementById("close-btn");
-      if (existingClose) existingClose.remove();
-
-      const iframe = document.createElement("iframe");
       iframe.src = link;
-      iframe.id = "fullscreen-quiz";
-      iframe.allowFullscreen = true;
+      iframe.style.display = "block";
+      closeBtn.style.display = "inline-block";
 
-      iframe.style.position = "fixed";
-      iframe.style.top = "0";
-      iframe.style.left = "0";
-      iframe.style.width = "100vw";
-      iframe.style.height = "100vh";
-      iframe.style.zIndex = "9999";
-      iframe.style.border = "none";
-
-      document.body.appendChild(iframe);
-
-      // X düyməsi
-      const closeBtn = document.createElement("button");
-      closeBtn.textContent = "X";
-      closeBtn.id = "close-btn";
-      closeBtn.style.position = "fixed";
-      closeBtn.style.top = "10px";
-      closeBtn.style.right = "10px";
-      closeBtn.style.zIndex = "10000";
-      closeBtn.style.backgroundColor = "red";
-      closeBtn.style.color = "white";
-      closeBtn.style.border = "none";
-      closeBtn.style.padding = "10px 15px";
-      closeBtn.style.fontSize = "16px";
-      closeBtn.style.borderRadius = "5px";
-      closeBtn.style.cursor = "pointer";
-      closeBtn.onclick = () => {
-        iframe.remove();
-        closeBtn.remove();
-        const fsBtn = document.getElementById("fs-btn");
-        if (fsBtn) fsBtn.remove();
-      };
-      document.body.appendChild(closeBtn);
-
-      // Mobil cihazlar üçün Tam Ekran düyməsi
-      if (isMobile) {
-        const fsBtn = document.createElement("button");
-        fsBtn.textContent = "Tam Ekran";
-        fsBtn.id = "fs-btn";
-        fsBtn.style.position = "fixed";
-        fsBtn.style.bottom = "20px";
-        fsBtn.style.right = "20px";
-        fsBtn.style.zIndex = "10000";
-        fsBtn.style.backgroundColor = "#4CAF50";
-        fsBtn.style.color = "white";
-        fsBtn.style.border = "none";
-        fsBtn.style.padding = "10px 20px";
-        fsBtn.style.borderRadius = "6px";
-        fsBtn.style.fontSize = "16px";
-        fsBtn.style.cursor = "pointer";
-        fsBtn.onclick = () => {
-          if (iframe.requestFullscreen) iframe.requestFullscreen();
-          else if (iframe.webkitRequestFullscreen) iframe.webkitRequestFullscreen();
-          else if (iframe.msRequestFullscreen) iframe.msRequestFullscreen();
-        };
-        document.body.appendChild(fsBtn);
-      } else {
-        // PC-lər üçün avtomatik tam ekran
+      // Tam ekran yalnız masaüstü cihazlar üçün
+      if (!/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
         if (iframe.requestFullscreen) iframe.requestFullscreen();
         else if (iframe.webkitRequestFullscreen) iframe.webkitRequestFullscreen();
         else if (iframe.msRequestFullscreen) iframe.msRequestFullscreen();
-
-        document.addEventListener("fullscreenchange", handleExit);
-        document.addEventListener("webkitfullscreenchange", handleExit);
-        document.addEventListener("msfullscreenchange", handleExit);
       }
     }
 
-    function handleExit() {
-      const iframe = document.getElementById("fullscreen-quiz");
-      if (!document.fullscreenElement && iframe) {
-        iframe.remove();
-        const closeBtn = document.getElementById("close-btn");
-        if (closeBtn) closeBtn.remove();
-        const fsBtn = document.getElementById("fs-btn");
-        if (fsBtn) fsBtn.remove();
-        document.removeEventListener("fullscreenchange", handleExit);
-        document.removeEventListener("webkitfullscreenchange", handleExit);
-        document.removeEventListener("msfullscreenchange", handleExit);
-      }
+    function closeQuiz() {
+      const iframe = document.getElementById("quiz-frame");
+      const closeBtn = document.getElementById("close-btn");
+
+      iframe.src = "";
+      iframe.style.display = "none";
+      closeBtn.style.display = "none";
+
+      // Əgər fullscreen-dən çıxmaq lazımdırsa
+      if (document.fullscreenElement) document.exitFullscreen();
+      else if (document.webkitFullscreenElement) document.webkitExitFullscreen();
+      else if (document.msFullscreenElement) document.msExitFullscreen();
     }
 
     window.onload = checkIP;
