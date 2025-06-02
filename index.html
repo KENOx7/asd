@@ -2,7 +2,32 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>keno</title>
+  <title>IP Güvənliyi</title>
+  <style>
+    .quiz-container {
+      position: relative;
+      flex: 1;
+    }
+
+    .fullscreen-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 10;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  </style>
   <script>
     const allowedIPs = [
       "37.114.162.55",
@@ -23,24 +48,9 @@
         if (allowedIPs.includes(userIP)) {
           document.getElementById("container").innerHTML = `
             <div style="width:100%;display:flex;flex-direction:column;gap:8px;min-height:635px;">
-              <iframe src="https://quizizz.com/embed/quiz/683dddfd79bab9c70d96170f"
-                      title=" - Quizizz"
-                      style="flex:1;"
-                      frameBorder="0"
-                      allowfullscreen>
-              </iframe>
-              <iframe src="https://quizizz.com/embed/quiz/683dde151f8214ac74f7703d"
-                      title=" - Quizizz"
-                      style="flex:1;"
-                      frameBorder="0"
-                      allowfullscreen>
-              </iframe>
-              <iframe src="https://quizizz.com/embed/quiz/683dde314708a5aad48cb67f"
-                      title=" - Quizizz"
-                      style="flex:1;"
-                      frameBorder="0"
-                      allowfullscreen>
-              </iframe>
+              ${createQuizFrame("https://quizizz.com/embed/quiz/683dddfd79bab9c70d96170f")}
+              ${createQuizFrame("https://quizizz.com/embed/quiz/683dde151f8214ac74f7703d")}
+              ${createQuizFrame("https://quizizz.com/embed/quiz/683dde314708a5aad48cb67f")}
               <a href="https://quizizz.com/admin?source=embedFrame" target="_blank">Explore more at Quizizz.</a>
             </div>
           `;
@@ -49,6 +59,27 @@
         }
       } catch (err) {
         console.error("Xəta baş verdi:", err);
+      }
+    }
+
+    function createQuizFrame(src) {
+      const id = `iframe-${Math.random().toString(36).substr(2, 9)}`;
+      return `
+        <div class="quiz-container">
+          <button class="fullscreen-btn" onclick="openFullscreen('${id}')">Tam Ekran</button>
+          <iframe id="${id}" src="${src}" allowfullscreen></iframe>
+        </div>
+      `;
+    }
+
+    function openFullscreen(id) {
+      const iframe = document.getElementById(id);
+      if (iframe.requestFullscreen) {
+        iframe.requestFullscreen();
+      } else if (iframe.webkitRequestFullscreen) {
+        iframe.webkitRequestFullscreen();
+      } else if (iframe.msRequestFullscreen) {
+        iframe.msRequestFullscreen();
       }
     }
 
