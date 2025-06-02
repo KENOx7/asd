@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>IP Güvənliyi</title>
+  <title>kenoo</title>
   <style>
     .quiz-container {
       position: relative;
@@ -28,6 +28,10 @@
       border: none;
     }
   </style>
+</head>
+<body>
+  <div id="container" style="min-height:100px;">Yoxlanılır...</div>
+
   <script>
     const allowedIPs = [
       "37.114.162.55",
@@ -39,26 +43,14 @@
       "94.20.42.211"
     ];
 
-    async function checkIP() {
+    async function getIP() {
       try {
         const res = await fetch('https://api.ipify.org?format=json');
         const data = await res.json();
-        const userIP = data.ip;
-
-        if (allowedIPs.includes(userIP)) {
-          document.getElementById("container").innerHTML = `
-            <div style="width:100%;display:flex;flex-direction:column;gap:8px;min-height:635px;">
-              ${createQuizFrame("https://quizizz.com/embed/quiz/683dddfd79bab9c70d96170f")}
-              ${createQuizFrame("https://quizizz.com/embed/quiz/683dde151f8214ac74f7703d")}
-              ${createQuizFrame("https://quizizz.com/embed/quiz/683dde314708a5aad48cb67f")}
-              <a href="https://quizizz.com/admin?source=embedFrame" target="_blank">Explore more at Quizizz.</a>
-            </div>
-          `;
-        } else {
-          document.getElementById("container").innerHTML = ""; // İcazə olmayan IP üçün heç nə göstərilməyəcək
-        }
-      } catch (err) {
-        console.error("Xəta baş verdi:", err);
+        return data.ip;
+      } catch (e) {
+        console.error("IP almaq mümkün olmadı:", e);
+        return null;
       }
     }
 
@@ -74,19 +66,42 @@
 
     function openFullscreen(id) {
       const iframe = document.getElementById(id);
-      if (iframe.requestFullscreen) {
-        iframe.requestFullscreen();
-      } else if (iframe.webkitRequestFullscreen) {
-        iframe.webkitRequestFullscreen();
-      } else if (iframe.msRequestFullscreen) {
-        iframe.msRequestFullscreen();
+      if (iframe.requestFullscreen) iframe.requestFullscreen();
+      else if (iframe.webkitRequestFullscreen) iframe.webkitRequestFullscreen();
+      else if (iframe.msRequestFullscreen) iframe.msRequestFullscreen();
+    }
+
+    async function checkAndRender() {
+      const ip = await getIP();
+      if (!ip) {
+        document.getElementById("container").innerText = "IP yoxlanıla bilmədi.";
+        return;
+      }
+
+      if (allowedIPs.includes(ip)) {
+        localStorage.setItem("ip_access_granted", "1");
+        document.getElementById("container").innerHTML = `
+          <div style="width:100%;display:flex;flex-direction:column;gap:8px;min-height:635px;">
+            ${createQuizFrame("https://quizizz.com/embed/quiz/683dddfd79bab9c70d96170f")}
+            ${createQuizFrame("https://quizizz.com/embed/quiz/683dde151f8214ac74f7703d")}
+            ${createQuizFrame("https://quizizz.com/embed/quiz/683dde314708a5aad48cb67f")}
+            <a href="https://quizizz.com/admin?source=embedFrame" target="_blank">Explore more at Quizizz.</a>
+          </div>
+        `;
+      } else {
+        localStorage.removeItem("ip_access_granted");
+        document.getElementById("container").innerHTML = `<p style="color:red;">Bu IP ilə girişə icazə verilmir.</p>`;
       }
     }
 
-    window.onload = checkIP;
+    // Səhifə yüklənəndə yoxla
+    window.onload = () => {
+      if (localStorage.getItem("ip_access_granted") === "1") {
+        checkAndRender(); // Refresh edilsə belə yoxlamanı davam etdir
+      } else {
+        checkAndRender();
+      }
+    };
   </script>
-</head>
-<body>
-  <div id="container" style="min-height:100px;"></div>
 </body>
 </html>
