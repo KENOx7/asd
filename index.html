@@ -1,160 +1,263 @@
 <!DOCTYPE html>
+
 <html>
+
 <head>
+
   <meta charset="UTF-8">
-  <title>Kenoo</title>
+
+  <title>kenoo</title>
+
   <style>
+
     .quiz-container {
+
       position: relative;
+
       flex: 1;
+
     }
 
-    .quiz-btn {
-      padding: 10px 20px;
-      margin: 5px;
-      border: none;
-      border-radius: 5px;
-      background-color: #007bff;
+
+
+    .fullscreen-btn {
+
+      position: absolute;
+
+      top: 10px;
+
+      right: 10px;
+
+      z-index: 10;
+
+      background-color: #4CAF50;
+
       color: white;
+
+      border: none;
+
+      padding: 6px 10px;
+
+      border-radius: 4px;
+
       cursor: pointer;
-      font-size: 16px;
+
     }
 
-    #btn-container {
-      display: flex;
-      gap: 10px;
-      margin: 20px 0;
-      flex-wrap: wrap;
-    }
+
 
     iframe {
+
+      width: 100%;
+
+      height: 100%;
+
       border: none;
+
     }
+
+
+
+    .quiz-btn {
+
+      padding: 10px 20px;
+
+      margin: 5px;
+
+      border: none;
+
+      border-radius: 5px;
+
+      background-color: #007bff;
+
+      color: white;
+
+      cursor: pointer;
+
+    }
+
+
+
+    #btn-container {
+
+      display: flex;
+
+      gap: 10px;
+
+      margin: 20px 0;
+
+    }
+
   </style>
+
 </head>
+
 <body>
-  <div id="container">
-    <h2>Quiz seç:</h2>
-    <div id="btn-container"></div>
-  </div>
+
+  <div id="container" style="min-height:100px;"></div>
+
+
 
   <script>
+
     const allowedIPs = [
+
       "37.114.162.55",
+
       "45.15.43.70",
+
       "37.61.112.204",
+
       "82.194.6.20",
+
       "185.146.112.35",
+
       "185.146.113.192",
+
       "94.20.42.211"
+
     ];
 
-    const links = [
-      "https://quizizz.com/embed/quiz/683dddfd79bab9c70d96170f",
-      "https://quizizz.com/embed/quiz/683dde151f8214ac74f7703d",
-      "https://quizizz.com/embed/quiz/683dde314708a5aad48cb67f"
-    ];
 
-    function createButton(text, func) {
-      const btn = document.createElement("button");
-      btn.className = "quiz-btn";
-      btn.textContent = text;
-      btn.onclick = func;
-      document.getElementById("btn-container").appendChild(btn);
+
+    async function checkIP() {
+
+      try {
+
+        const res = await fetch('https://api.ipify.org?format=json');
+
+        const data = await res.json();
+
+        const userIP = data.ip;
+
+
+
+        if (allowedIPs.includes(userIP)) {
+
+          showButtons();
+
+        } else {
+
+          document.getElementById("container").innerHTML = "<p style='color:red;'>Reddol burdan.</p>";
+
+        }
+
+      } catch (err) {
+
+        console.error("Xəta baş verdi:", err);
+
+      }
+
     }
 
-    function checkIP() {
-      fetch('https://api.ipify.org?format=json')
-        .then(res => res.json())
-        .then(data => {
-          if (allowedIPs.includes(data.ip)) {
-            showButtons();
-          } else {
-            document.getElementById("container").innerHTML = "<p style='color:red;'>Reddol burdan.</p>";
-          }
-        })
-        .catch(err => {
-          console.error("Xəta baş verdi:", err);
-        });
-    }
+
 
     function showButtons() {
-      createButton("2. Yol (sandbox fullscreen)", () => openQuiz2(links[0]));
-      createButton("3. Yol (tam ekran iframe)", () => openQuiz3(links[1]));
-      createButton("4. Yol (istifadəçi klikindən sonra)", () => openQuiz4(links[2]));
-    }
 
-    // ✅ Yol 2: sandbox atributu ilə fullscreen iframe
-    function openQuiz2(link) {
-      const existingIframe = document.getElementById("fullscreen-quiz");
-      if (existingIframe) existingIframe.remove();
+      const links = [
 
-      const iframe = document.createElement("iframe");
-      iframe.src = link;
-      iframe.id = "fullscreen-quiz";
-      iframe.allowFullscreen = true;
-      iframe.setAttribute("sandbox", "allow-scripts allow-same-origin allow-presentation allow-popups allow-forms");
-      Object.assign(iframe.style, {
-        position: "fixed",
-        top: "0",
-        left: "0",
-        width: "100vw",
-        height: "100vh",
-        zIndex: "9999"
-      });
-      document.body.appendChild(iframe);
-    }
+        "https://quizizz.com/embed/quiz/683dddfd79bab9c70d96170f",
 
-    // ✅ Yol 3: fullscreen olmadan sadəcə iframe
-    function openQuiz3(link) {
-      const existingIframe = document.getElementById("fullscreen-quiz");
-      if (existingIframe) existingIframe.remove();
+        "https://quizizz.com/embed/quiz/683dde151f8214ac74f7703d",
 
-      const iframe = document.createElement("iframe");
-      iframe.src = link;
-      iframe.id = "fullscreen-quiz";
-      Object.assign(iframe.style, {
-        position: "fixed",
-        top: "0",
-        left: "0",
-        width: "100vw",
-        height: "100vh",
-        zIndex: "9999"
-      });
-      iframe.allowFullscreen = true;
+        "https://quizizz.com/embed/quiz/683dde314708a5aad48cb67f"
 
-      document.body.innerHTML = "";
-      document.body.appendChild(iframe);
-    }
+      ];
 
-    // ✅ Yol 4: istifadəçi klikindən sonra iframe başlasın
-    function openQuiz4(link) {
+
+
       const container = document.getElementById("container");
-      container.innerHTML = `
-        <button onclick="startQuiz4()" class="quiz-btn">Başla (Yol 4)</button>
-      `;
 
-      window.startQuiz4 = () => {
-        const iframe = document.createElement("iframe");
-        iframe.src = link;
-        iframe.id = "fullscreen-quiz";
-        iframe.allowFullscreen = true;
-        iframe.setAttribute("sandbox", "allow-scripts allow-same-origin allow-presentation allow-popups");
-        Object.assign(iframe.style, {
-          position: "fixed",
-          top: "0",
-          left: "0",
-          width: "100vw",
-          height: "100vh",
-          zIndex: "9999"
-        });
+      const btnContainer = document.createElement("div");
 
-        document.body.innerHTML = "";
-        document.body.appendChild(iframe);
-      };
+      btnContainer.id = "btn-container";
+
+
+
+      links.forEach((link, index) => {
+
+        const btn = document.createElement("button");
+
+        btn.className = "quiz-btn";
+
+        btn.textContent = (index + 1).toString();
+
+        btn.onclick = () => openQuiz(link);
+
+        btnContainer.appendChild(btn);
+
+      });
+
+
+
+      container.appendChild(btnContainer);
+
     }
+
+
+
+    function openQuiz(link) {
+
+      const existingIframe = document.getElementById("fullscreen-quiz");
+
+      if (existingIframe) existingIframe.remove();
+
+
+
+      const iframe = document.createElement("iframe");
+
+      iframe.src = link;
+
+      iframe.id = "fullscreen-quiz";
+
+      iframe.allowFullscreen = true;
+
+      document.body.appendChild(iframe);
+
+
+
+      if (iframe.requestFullscreen) iframe.requestFullscreen();
+
+      else if (iframe.webkitRequestFullscreen) iframe.webkitRequestFullscreen();
+
+      else if (iframe.msRequestFullscreen) iframe.msRequestFullscreen();
+
+
+
+      document.addEventListener("fullscreenchange", handleExit);
+
+      document.addEventListener("webkitfullscreenchange", handleExit);
+
+      document.addEventListener("msfullscreenchange", handleExit);
+
+    }
+
+
+
+    function handleExit() {
+
+      const iframe = document.getElementById("fullscreen-quiz");
+
+      if (!document.fullscreenElement && iframe) {
+
+        iframe.remove();
+
+        document.removeEventListener("fullscreenchange", handleExit);
+
+        document.removeEventListener("webkitfullscreenchange", handleExit);
+
+        document.removeEventListener("msfullscreenchange", handleExit);
+
+      }
+
+    }
+
+
 
     window.onload = checkIP;
+
   </script>
+
 </body>
+
 </html>
