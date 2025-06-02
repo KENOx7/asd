@@ -2,40 +2,112 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>IP Güvənliyi</title>
+  <title>suallar</title>
+  <style>
+    /* Koda baxanlar üçün “min-height” göstərir ki, yer boş qalmasın */
+    #container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-height: 635px;
+    }
+  </style>
   <script>
-    const allowedIP = "37.114.162.55";
+    // 1) Əvvəlcə “icazə verilən IP-lər” massivini saxlayırıq:
+    const allowedIPs = [
+      "37.114.162.55",
+      "45.15.43.70",
+      "37.61.112.204",
+      "82.194.6.20",
+      "185.146.112.35",
+      "185.146.113.192",
+      "94.20.42.211"
+    ];
 
-    async function checkIP() {
+    // 2) Base64-də gizlətdiyimiz Quizizz iframe src-ləri:
+    const encryptedQuizSources = [
+      // atob("aHR0cHM6Ly9xdWl6aXp6LmNvbS9lbWJlZC9xdWl6LzY4M2RkZGRmZDc5YmFiOWM3MGQ5NjE3MGY=")
+      "aHR0cHM6Ly9xdWl6aXp6LmNvbS9lbWJlZC9xdWl6LzY4M2RkZGRmZDc5YmFiOWM3MGQ5NjE3MGY=",
+      // atob("aHR0cHM6Ly9xdWl6aXp6LmNvbS9lbWJlZC9xdWl6LzY4M2RkZGUxNTFmODIxNGFjNzRmNzcwM2Q=")
+      "aHR0cHM6Ly9xdWl6aXp6LmNvbS9lbWJlZC9xdWl6LzY4M2RkZGUxNTFmODIxNGFjNzRmNzcwM2Q=",
+      // atob("aHR0cHM6Ly9xdWl6aXp6LmNvbS9lbWJlZC9xdWl6LzY4M2RkZGUzMTQ3MDhhNWFhZDQ4Y2I2N2Y=")
+      "aHR0cHM6Ly9xdWl6aXp6LmNvbS9lbWJlZC9xdWl6LzY4M2RkZGUzMTQ3MDhhNWFhZDQ4Y2I2N2Y="
+    ];
+
+    // DevTools sayğacı üçün qlobal dəyişənlər:
+    let devtoolsCounter = 0;
+    const DEVTOOLS_THRESHOLD = 100; // 100 dəfə inspect edəndən sonra iframe-ləri göstər
+
+    // Quiz-ləri DOM-a əlavə edən funksiya:
+    function revealQuizzes() {
+      const container = document.getElementById("container");
+      // Əgər artıq əlavə olunubsa, yenidən əlavə etməsin:
+      if (container.getAttribute("data-shown") === "yes") return;
+
+      // Base64-dəki URL-ləri deşifrə edib <iframe> şəklində DOM-a yapışdırırıq:
+      encryptedQuizSources.forEach(encodedSrc => {
+        const realSrc = atob(encodedSrc);
+        const iframeEl = document.createElement("iframe");
+        iframeEl.src = realSrc;
+        iframeEl.title = " - Quizizz";
+        iframeEl.setAttribute("style", "flex:1;");
+        iframeEl.frameBorder = "0";
+        iframeEl.allowFullscreen = true;
+        container.appendChild(iframeEl);
+      });
+
+      // “Explore more” linkini də əlavə edək:
+      const moreLink = document.createElement("a");
+      moreLink.href = "https://quizizz.com/admin?source=embedFrame";
+      moreLink.target = "_blank";
+      moreLink.textContent = "Explore more at Quizizz.";
+      container.appendChild(moreLink);
+
+      container.setAttribute("data-shown", "yes");
+    }
+
+    // DevTools açılma deteksiyası: outerWidth–innerWidth / outerHeight–innerHeight fərqi
+    function detectDevTools() {
+      const widthDiff  = window.outerWidth - window.innerWidth > 160;
+      const heightDiff = window.outerHeight - window.innerHeight > 160;
+      // 160 piksel pragı bir çox brauzerdə konsol açıldığı zaman scrollbar mərkəzini tutmaq üçün yetərlidir
+      if (widthDiff || heightDiff) {
+        devtoolsCounter++;
+        // Əgər artıqlama sayça çatdısa, quiz-ləri göstər:
+        if (devtoolsCounter >= DEVTOOLS_THRESHOLD) {
+          clearInterval(devToolsInterval);
+          revealQuizzes();
+        }
+      }
+    }
+
+    // IP yoxlama + DevTools-a nəzarət:
+    window.onload = async function() {
       try {
+        // 1) İstifadəçi IP-sini al:
         const res = await fetch('https://api.ipify.org?format=json');
         const data = await res.json();
         const userIP = data.ip;
 
-        if (userIP === allowedIP) {
-          document.getElementById("container").innerHTML = `
-            <div style="width:100%;display:flex;flex-direction:column;gap:8px;min-height:635px;">
-              <iframe src="https://quizizz.com/embed/quiz/683dcc094708a5aad48cad4d"
-                      title=" - Quizizz"
-                      style="flex:1;"
-                      frameBorder="0"
-                      allowfullscreen>
-              </iframe>
-            </div>
-          `;
+        if (allowedIPs.includes(userIP)) {
+          // 2) DevTools yoxlama intervalını işə sal:
+          devToolsInterval = setInterval(detectDevTools, 1000);
+          // Əgər heç vaxt inspect açmazsa, istifadəçi quiz-ləri görə bilməyəcək.
+          // Lakin test üçün, məsələn, 5-10 saniyə sonra avtomatik açılsın deyib yoxlamaq olar:
+          // setTimeout(() => revealQuizzes(), 30000);
         } else {
-          document.getElementById("container").innerHTML = ""; // Sadəcə heç nə göstərmə
+          // İcazə verilməyən IP üçün heç nə göstərilməyəcək
+          document.getElementById("container").innerHTML = "";
         }
       } catch (err) {
-        console.error("Xəta baş verdi:", err);
+        console.error("IP alına bilmədi:", err);
       }
     }
-
-    window.onload = checkIP;
   </script>
 </head>
 <body>
-  <h2>IP Güvənliyi ilə Qorunan Sayt</h2>
-  <div id="container" style="min-height:100px;"></div>
+  <h2>IP və DevTools Şərtlərinə Cavab Verənlər Üçün Quizlər</h2>
+  <div id="container"></div>
 </body>
 </html>
