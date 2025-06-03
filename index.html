@@ -257,26 +257,6 @@
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
       background-color: #fff;
     }
-    #quiz-buttons {
-      margin-top: 12px;
-      display: flex;
-      gap: 12px;
-    }
-    .quiz-action-btn {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      background: linear-gradient(135deg, var(--btn-primary-start) 0%, var(--btn-primary-end) 100%);
-      color: #fff;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.3s ease, transform 0.2s ease;
-    }
-    .quiz-action-btn:hover {
-      background: linear-gradient(135deg, var(--btn-primary-end) 0%, #1565c0 100%);
-      transform: scale(1.03);
-    }
 
     /* ===== Xəta Mesajı (Toast) ===== */
     #toast {
@@ -395,11 +375,8 @@
     const clickAudio = document.getElementById("clickSound");
     const toggleBtn = document.getElementById("darkToggle");
 
-    // iOS/Android yoxlaması
+    // iOS/Android yoxlaması (yalnız PC‐də tam ekran üçün istifadə olunacaq)
     const isiOS = /iPad|iPhone|iPod|Android/.test(navigator.userAgent) && !window.MSStream;
-
-    // Mobil üçün “Tam Ekrandan Çıx” bazasında bayraq
-    let isExitRequested = false;
 
     // localStorage-dan son mövzunu yüklə və Dark mode vəziyyətini təyin et
     document.addEventListener("DOMContentLoaded", () => {
@@ -486,7 +463,6 @@
 
     // Əsas menyuya qayıt funksiyası
     function showMainMenu() {
-      // Quiz-wrapper varsa, sil
       const prevWrapper = document.getElementById("quiz-wrapper");
       if (prevWrapper) prevWrapper.remove();
 
@@ -548,7 +524,6 @@
         'diferensial': ["1-100", "101-205", "206-301"]
       };
 
-      // Məzmunu gizlədək, sonra yenisini göstərək
       container.classList.add("hidden");
       setTimeout(() => {
         container.classList.remove("has-back", "hidden");
@@ -584,7 +559,7 @@
       }, 300);
     }
 
-    // Quiz-i iframe-də açan funksiya
+    // Quiz-i iframe-də açan funksiya (yalnız PC üçün avtomatik full‐screen)
     function openQuiz(link) {
       // Əvvəlki quiz-wrapper varsa, sil
       const prevWrapper = document.getElementById("quiz-wrapper");
@@ -604,103 +579,35 @@
       iframe.setAttribute("mozallowfullscreen", "");
       wrapper.appendChild(iframe);
 
-      // PC üçün – avtomatik tam ekran rejiminə keç
+      // **Yalnız PC mühitində** avtomatik tam ekran rejiminə keç
       if (!isiOS) {
         if (wrapper.requestFullscreen) {
-          wrapper.requestFullscreen().catch(()=>{}); // bəzi brauzerlərdə izin lazım ola bilər
+          wrapper.requestFullscreen().catch(() => {});
         } else if (wrapper.webkitRequestFullscreen) {
           wrapper.webkitRequestFullscreen();
         } else if (wrapper.msRequestFullscreen) {
           wrapper.msRequestFullscreen();
         }
+
+        document.addEventListener("fullscreenchange", handleExit);
+        document.addEventListener("webkitfullscreenchange", handleExit);
+        document.addEventListener("msfullscreenchange", handleExit);
       }
 
-      // Mobil üçün – “Tam Ekran”, “Tam Ekrandan Çıx” və “Quiz-i Bağla” düymələri
-      if (isiOS) {
-        const btnContainer = document.createElement("div");
-        btnContainer.id = "quiz-buttons";
-
-        // Tam Ekran düyməsi
-        const enterBtn = document.createElement("button");
-        enterBtn.className = "quiz-action-btn";
-        enterBtn.textContent = "Tam Ekran";
-        enterBtn.onclick = () => {
-          if (wrapper.requestFullscreen) {
-            wrapper.requestFullscreen().catch(()=>{});
-          } else if (wrapper.webkitRequestFullscreen) {
-            wrapper.webkitRequestFullscreen();
-          } else if (wrapper.msRequestFullscreen) {
-            wrapper.msRequestFullscreen();
-          }
-        };
-        btnContainer.appendChild(enterBtn);
-
-        // Tam Ekrandan Çıx düyməsi
-        const exitBtn = document.createElement("button");
-        exitBtn.className = "quiz-action-btn";
-        exitBtn.textContent = "Tam Ekrandan Çıx";
-        exitBtn.onclick = () => {
-          // Bayrağı işarələyirik ki, yalnız exitFullscreen olunduqda bura düşsün
-          isExitRequested = true;
-          if (document.fullscreenElement) {
-            document.exitFullscreen();
-          } else if (document.webkitFullscreenElement) {
-            document.webkitExitFullscreen();
-          } else if (document.msFullscreenElement) {
-            document.msExitFullscreen();
-          }
-        };
-        btnContainer.appendChild(exitBtn);
-
-        // Quiz-i Bağla düyməsi
-        const closeBtn = document.createElement("button");
-        closeBtn.className = "quiz-action-btn";
-        closeBtn.textContent = "Quiz-i Bağla";
-        closeBtn.onclick = () => {
-          // Əgər fullscreen rejimindəsə, əvvəlcə fullscreen-dan çıx
-          if (document.fullscreenElement) {
-            document.exitFullscreen();
-          } else if (document.webkitFullscreenElement) {
-            document.webkitExitFullscreen();
-          }
-          // Wrapper-ı sil və əsas menyuya qayıt
-          wrapper.remove();
-          showMainMenu();
-        };
-        btnContainer.appendChild(closeBtn);
-
-        wrapper.appendChild(btnContainer);
-      }
-
+      // Mobil brauzerdə iframe sadəcə görünəcək, heç bir full‐screen çağırışı olmayacaq
       document.body.appendChild(wrapper);
-
-      // Tam ekrandan çıxış event-ləri – həm PC, həm də mobil üçün
-      document.addEventListener("fullscreenchange", handleExit);
-      document.addEventListener("webkitfullscreenchange", handleExit);
-      document.addEventListener("msfullscreenchange", handleExit);
     }
 
-    // Tam ekrandan çıxanda və ya exit düyməsinə basanda yalnız lazım olan işləri gör
+    // Tam ekrandan çıxanda wrapper-ı sil və əsas menyuya dön
     function handleExit() {
       const wrapper = document.getElementById("quiz-wrapper");
-      // Bir dəqiqəlik fullscreen-un başa çatdığını yoxlayırıq
       if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
-        if (isExitRequested) {
-          // Yalnız “Tam Ekrandan Çıx” düyməsi ilə çağırılmışkən
-          // Quiz pəncərəsi eyni qalır, sadəcə bayrağı sıfırlayıb listener-ləri söndürək
-          isExitRequested = false;
+        if (wrapper) {
+          wrapper.remove();
           document.removeEventListener("fullscreenchange", handleExit);
           document.removeEventListener("webkitfullscreenchange", handleExit);
           document.removeEventListener("msfullscreenchange", handleExit);
-        } else {
-          // Əgər exitFullscreen deyil, yəni ya F12 düyməsindən çıxdı, ya da başqa səbəbdən fullscreen bitdi
-          if (wrapper) {
-            wrapper.remove();
-            document.removeEventListener("fullscreenchange", handleExit);
-            document.removeEventListener("webkitfullscreenchange", handleExit);
-            document.removeEventListener("msfullscreenchange", handleExit);
-            showMainMenu();
-          }
+          showMainMenu();
         }
       }
     }
