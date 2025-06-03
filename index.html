@@ -2,13 +2,10 @@
 <html lang="az">
 <head>
   <meta charset="UTF-8">
-  <!-- Mobil cihazlarda düzgün miqyas üçün metatag -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kenoo</title>
-  <!-- Google Fonts: Poppins -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    /* ===== CSS Dəyişənləri (Dark/Light Mode üçün) ===== */
     :root {
       --bg-gradient-start: #e3f2fd;
       --bg-gradient-end: #ffffff;
@@ -36,7 +33,6 @@
       --toast-text: #fff;
     }
 
-    /* ===== Ümumi Tərtibat ===== */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -75,7 +71,6 @@
       50% { border-color: transparent; }
     }
 
-    /* ===== Loading Spinner ===== */
     #loader {
       position: fixed;
       top: 0;
@@ -105,7 +100,6 @@
       to { transform: rotate(360deg); }
     }
 
-    /* ===== Container & Fade-In/Fade-Out ===== */
     #container {
       width: 100%;
       max-width: 600px;
@@ -132,7 +126,6 @@
       margin-bottom: 16px;
     }
 
-    /* ===== “Geri” Düyməsi ===== */
     .back-btn {
       position: absolute;
       top: 16px;
@@ -156,7 +149,6 @@
       padding-top: 50px;
     }
 
-    /* ===== Başlanğıc Düymələri ===== */
     .start-btn {
       position: relative;
       padding: 14px 28px;
@@ -178,7 +170,6 @@
       transform: scale(1.03);
     }
 
-    /* ===== Quiz Seçim Düymələri ===== */
     #btn-container {
       display: flex;
       flex-wrap: wrap;
@@ -218,7 +209,6 @@
       box-shadow: 0 6px 16px rgba(255, 183, 77, 0.5);
     }
 
-    /* ===== Ripple Effekti ===== */
     button {
       overflow: hidden;
     }
@@ -236,7 +226,6 @@
       }
     }
 
-    /* ===== Iframe və Tam Ekran Düyməsi Tərtibatı ===== */
     #quiz-wrapper {
       position: fixed;
       top: 0; left: 0;
@@ -247,7 +236,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      z-index: 999; /* loader və container-dan üstün */
+      z-index: 999;
     }
     #quiz-wrapper iframe {
       width: 90%;
@@ -278,7 +267,6 @@
       transform: scale(1.03);
     }
 
-    /* ===== Xəta Mesajı (Toast) ===== */
     #toast {
       position: fixed;
       bottom: 20px;
@@ -298,10 +286,6 @@
       opacity: 1;
     }
 
-    /* ===== Audio (gizli) ===== */
-    /* click.mp3 faylını layihə qovluğuna yerləşdirməlisiniz */
-
-    /* ===== Dark Mode Toggle Düyməsi ===== */
     .dark-toggle {
       position: fixed;
       top: 16px;
@@ -324,7 +308,6 @@
       background-color: rgba(0,0,0,0.1);
     }
 
-    /* ===== Mobil optimallaşdırma ===== */
     @media (max-width: 600px) {
       body {
         padding: 10px;
@@ -348,30 +331,29 @@
       #btn-container {
         gap: 8px;
       }
-      /* Mobildə iframe ölçüsü */
       #quiz-wrapper iframe {
         width: 98%;
         height: 70%;
       }
     }
+
+    /* Gizlənəcək elementlər üçün class */
+    .hidden {
+      display: none !important;
+    }
   </style>
 </head>
 <body>
-  <!-- Loading Spinner -->
   <div id="loader">
     <div class="spinner"></div>
   </div>
 
-  <!-- Dark Mode Toggle -->
   <button id="darkToggle" class="dark-toggle">🌙</button>
 
-  <!-- Başlıq (Typing Effect) -->
   <h1>Quiz Mövzularını Seçin</h1>
 
-  <!-- Toast Bildiriş -->
   <div id="toast">Sizin IP icazəli deyil!</div>
 
-  <!-- Əsas Kontent -->
   <div id="container">
     <p class="section-title">Başlanğıc mövzusu:</p>
     <button class="start-btn" onclick="startQuiz('proqramlasdirma')">Proqramlaşdırma</button>
@@ -380,8 +362,12 @@
     <button class="start-btn" onclick="startQuiz('diferensial')">Diferensial</button>
   </div>
 
-  <!-- Click Sound (Audio) -->
   <audio id="clickSound" src="click.mp3" preload="auto"></audio>
+
+  <!-- “Tam Ekrandan Çıx” düyməsi (gizli başlanğıcda, PC üçün deyil, ümumi olaraq görünsün) -->
+  <button id="exitFullscreenBtn" class="quiz-action-btn" style="display: none; position: fixed; top: 16px; left: 16px; z-index:1001;">
+    Tam Ekrandan Çıx
+  </button>
 
   <script>
     const allowedIPPrefixes = [
@@ -394,11 +380,14 @@
     const loader = document.getElementById("loader");
     const clickAudio = document.getElementById("clickSound");
     const toggleBtn = document.getElementById("darkToggle");
+    const exitFullscreenBtn = document.getElementById("exitFullscreenBtn");
 
-    // iOS/Android yoxlaması
+    // Mobil/Tablet yoxlaması
     const isiOS = /iPad|iPhone|iPod|Android/.test(navigator.userAgent) && !window.MSStream;
 
-    // localStorage-dan son mövzunu yüklə və Dark mode vəziyyətini təyin et
+    // Gizlənəcək elementlər (header, footer varsa, əlavə et; biz container-ı gizlədəcəyik)
+    const unwantedElements = [ container, toggleBtn ];
+
     document.addEventListener("DOMContentLoaded", () => {
       const lastTopic = localStorage.getItem("lastTopic");
       const currentMode = localStorage.getItem("theme");
@@ -409,15 +398,21 @@
       if (lastTopic) {
         setTimeout(() => startQuiz(lastTopic), 800);
       }
+      // Bütün düymələrə ripple effekti və audio əlavə et
+      document.querySelectorAll("button").forEach(button => {
+        addRippleEffect(button);
+        button.addEventListener("click", () => {
+          clickAudio.currentTime = 0;
+          clickAudio.play();
+        });
+      });
     });
 
-    // Səhifə tam yüklənəndə loader-i gizlət
     window.addEventListener("load", () => {
       loader.classList.add("hidden");
       setTimeout(() => loader.style.display = "none", 300);
     });
 
-    // IP yoxlaması
     async function checkIP() {
       try {
         const res = await fetch('https://api.ipify.org?format=json');
@@ -433,7 +428,6 @@
       }
     }
 
-    // Toast göstərən funksiya
     function showToast(message) {
       toast.textContent = message;
       toast.classList.add("show");
@@ -442,7 +436,6 @@
       }, 3000);
     }
 
-    // Dark mode toggle funksiyası
     toggleBtn.addEventListener("click", () => {
       document.body.classList.toggle("dark");
       if (document.body.classList.contains("dark")) {
@@ -454,7 +447,6 @@
       }
     });
 
-    // Ripple effekti əlavə et
     function addRippleEffect(btn) {
       btn.addEventListener("click", function(e) {
         const rect = btn.getBoundingClientRect();
@@ -471,21 +463,17 @@
         btn.appendChild(circle);
       });
     }
-    document.addEventListener("DOMContentLoaded", () => {
-      document.querySelectorAll("button").forEach(button => {
-        addRippleEffect(button);
-        button.addEventListener("click", () => {
-          clickAudio.currentTime = 0;
-          clickAudio.play();
-        });
-      });
-    });
 
-    // Əsas menyuya qayıt funksiyası
     function showMainMenu() {
       // Quiz-wrapper varsa, sil
       const prevWrapper = document.getElementById("quiz-wrapper");
       if (prevWrapper) prevWrapper.remove();
+
+      // Tam ekrandan çıx düyməsini gizlət
+      exitFullscreenBtn.style.display = "none";
+
+      // Digər elementləri göstər
+      unwantedElements.forEach(el => el.classList.remove("hidden"));
 
       container.classList.remove('has-back', 'hidden');
       container.innerHTML = `
@@ -504,7 +492,6 @@
       });
     }
 
-    // Mövzu seçimi funksiyası
     function startQuiz(topic) {
       if (!userAllowed) return;
       localStorage.setItem("lastTopic", topic);
@@ -547,7 +534,7 @@
 
       container.classList.add("hidden");
       setTimeout(() => {
-        container.classList.remove("has-back", "hidden");
+        container.classList.remove("hidden", "has-back");
         container.classList.add("has-back");
         container.innerHTML = `
           <button class="back-btn" onclick="showMainMenu()">‹ Geri</button>
@@ -569,7 +556,6 @@
         container.appendChild(btnContainer);
 
         setTimeout(() => container.classList.remove("hidden"), 50);
-
         container.querySelectorAll("button").forEach(button => {
           addRippleEffect(button);
           button.addEventListener("click", () => {
@@ -580,17 +566,17 @@
       }, 300);
     }
 
-    // Quiz-i iframe-də açan funksiya
     function openQuiz(link) {
-      // Əvvəlki quiz-wrapper varsa, sil
       const prevWrapper = document.getElementById("quiz-wrapper");
       if (prevWrapper) prevWrapper.remove();
 
-      // Yeni wrapper div-i yarat
+      // Tam ekrana keç və digər elementləri gizlət
+      unwantedElements.forEach(el => el.classList.add("hidden"));
+      exitFullscreenBtn.style.display = "inline-block";
+
       const wrapper = document.createElement("div");
       wrapper.id = "quiz-wrapper";
 
-      // Yeni iframe yaradıb wrapper-ə əlavə et
       const iframe = document.createElement("iframe");
       iframe.src = link;
       iframe.id = "quiz-iframe";
@@ -600,10 +586,9 @@
       iframe.setAttribute("mozallowfullscreen", "");
       wrapper.appendChild(iframe);
 
-      // PC üçün – avtomatik tam ekran rejiminə keç
       if (!isiOS) {
         if (wrapper.requestFullscreen) {
-          wrapper.requestFullscreen().catch(()=>{}); // bəzi brauzerlərdə izin lazım ola bilər
+          wrapper.requestFullscreen().catch(()=>{});
         } else if (wrapper.webkitRequestFullscreen) {
           wrapper.webkitRequestFullscreen();
         } else if (wrapper.msRequestFullscreen) {
@@ -611,7 +596,7 @@
         }
       }
 
-      // Mobil üçün – “Tam Ekran”, “Tam Ekrandan Çıx” və “Quiz-i Bağla” düymələri
+      // Mobil üçün eyni düymə “Tam ekrana keç” funksiyasını saxlayır
       if (isiOS) {
         const btnContainer = document.createElement("div");
         btnContainer.id = "quiz-buttons";
@@ -631,57 +616,65 @@
         };
         btnContainer.appendChild(enterBtn);
 
-        // Tam Ekrandan Çıx düyməsi
-        const exitBtn = document.createElement("button");
-        exitBtn.className = "quiz-action-btn";
-        exitBtn.textContent = "Tam Ekrandan Çıx";
-        exitBtn.onclick = () => {
-          if (document.fullscreenElement) {
-            document.exitFullscreen();
-          } else if (document.webkitFullscreenElement) {
-            document.webkitExitFullscreen();
-          } else if (document.msFullscreenElement) {
-            document.msExitFullscreen();
-          }
-        };
-        btnContainer.appendChild(exitBtn);
-
-        // Quiz-i Bağla düyməsi
-        const closeBtn = document.createElement("button");
-        closeBtn.className = "quiz-action-btn";
-        closeBtn.textContent = "Quiz-i Bağla";
-        closeBtn.onclick = () => {
-          wrapper.remove();
-          showMainMenu();
-        };
-        btnContainer.appendChild(closeBtn);
-
         wrapper.appendChild(btnContainer);
       }
 
       document.body.appendChild(wrapper);
 
-      // Tam ekrandan çıxış event-ləri – həm PC, həm də mobil üçün
+      // Tam ekrandan çıxış event-ləri – təkcə əvvəlki halı bərpa etsin
       document.addEventListener("fullscreenchange", handleExit);
       document.addEventListener("webkitfullscreenchange", handleExit);
       document.addEventListener("msfullscreenchange", handleExit);
     }
 
-    // Tam ekrandan çıxanda və ya exit düyməsinə basanda wrapper-ı sil
     function handleExit() {
       const wrapper = document.getElementById("quiz-wrapper");
       if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
-        if (wrapper) {
-          wrapper.remove();
-          document.removeEventListener("fullscreenchange", handleExit);
-          document.removeEventListener("webkitfullscreenchange", handleExit);
-          document.removeEventListener("msfullscreenchange", handleExit);
-          showMainMenu();
-        }
+        // Tam ekrandan çıxdıqda, yalnız full-screen rejimini bitir, quiz-wrapper-ı saxla
+        // (istəsən, mobil üçün wrapper-ı silmə, ancaq PC-də full-screen çıxanda bu funksiyadan istifadə olunur)
+        // Burada heç bir silmə əməliyyatı yoxdur; user "Quiz-i Bağla" düyməsindən istifadə etməlidir.
       }
     }
 
-    // IP yoxlamasını səhifə yüklənəndə işə sal
+    // “Tam Ekrandan Çıx” düyməsi yalnız full-screen rejimini bitirsin, quiz-wrapper-ı saxlasın
+    exitFullscreenBtn.addEventListener("click", () => {
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      } else if (document.webkitFullscreenElement) {
+        document.webkitExitFullscreen();
+      } else if (document.msFullscreenElement) {
+        document.msExitFullscreen();
+      }
+      // Digər elementləri gizlətməyib saxlamırıq; user hələ də quiz wrapper-ı görəcək
+      // Sadəcə full-screen bitir.
+      exitFullscreenBtn.style.display = "none";
+    });
+
+    // “Quiz-i Bağla” düyməsi – quiz-wrapper-ı sil və əvvəlki halına qayıt
+    document.addEventListener("keydown", function (e) {
+      // F12 və Ctrl+Shift+I bloklama
+      if (e.key === "F12" || (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "i")) {
+        e.preventDefault();
+      }
+    });
+
+    // Bir xüsusi “Quiz-i Bağla” funksiyası – quiz-wrapper silsin, əvvəlki halına qayıtsın
+    function closeQuiz() {
+      const wrapper = document.getElementById("quiz-wrapper");
+      if (wrapper) wrapper.remove();
+      unwantedElements.forEach(el => el.classList.remove("hidden"));
+      exitFullscreenBtn.style.display = "none";
+      showMainMenu();
+    }
+
+    // “Quiz-i Bağla” düyməsini quiz-wrapper içərisinə daxil etmək üçün dinamik yaradılış
+    document.addEventListener("click", (e) => {
+      if (e.target && e.target.id === "quiz-wrapper") {
+        // Heç bir əməliyyat
+      }
+    });
+
+    // IP yoxlaması
     window.onload = checkIP;
   </script>
 </body>
