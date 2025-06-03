@@ -49,14 +49,15 @@
   <div id="container" style="min-height:100px;"></div>
 
   <script>
-    const allowedIPs = [
-      "37.114.162.55",
-      "45.15.43.70",
-      "37.61.112.204",
-      "82.194.6.20",
-      "185.146.112.35",
-      "185.146.113.192",
-      "94.20.42.221"
+    // İcazə verilən IP başlanğıcları (A.B. və ya A.B.C.)
+    const allowedIPPrefixes = [
+      "37.114.",
+      "45.15.",
+      "37.61.",
+      "82.194.",
+      "185.146.112.",
+      "185.146.113.",
+      "94.20."
     ];
 
     async function checkIP() {
@@ -65,7 +66,10 @@
         const data = await res.json();
         const userIP = data.ip;
 
-        if (allowedIPs.includes(userIP)) {
+        // Prefikslərə görə IP-nin uyğunluğunu yoxla
+        const isAllowed = allowedIPPrefixes.some(prefix => userIP.startsWith(prefix));
+
+        if (isAllowed) {
           showButtons();
         } else {
           document.getElementById("container").innerHTML = "<p style='color:red;'>Reddol burdan.</p>";
