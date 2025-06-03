@@ -117,7 +117,7 @@
       transition: transform 0.3s ease, opacity 0.4s ease;
       position: relative;
       opacity: 1;
-      z-index: 1; /* Quiz-wrapper-ın altında qalacaq */
+      z-index: 1;
     }
     #container.hidden {
       opacity: 0;
@@ -257,8 +257,12 @@
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
       background-color: #fff;
     }
-    #fullscreen-btn {
+    #quiz-buttons {
       margin-top: 12px;
+      display: flex;
+      gap: 12px;
+    }
+    .quiz-action-btn {
       padding: 10px 20px;
       border: none;
       border-radius: 8px;
@@ -269,7 +273,7 @@
       cursor: pointer;
       transition: background 0.3s ease, transform 0.2s ease;
     }
-    #fullscreen-btn:hover {
+    .quiz-action-btn:hover {
       background: linear-gradient(135deg, var(--btn-primary-end) 0%, #1565c0 100%);
       transform: scale(1.03);
     }
@@ -344,7 +348,7 @@
       #btn-container {
         gap: 8px;
       }
-      /* Mobilda iframe ölçüsünü bir az dəyişdik */
+      /* Mobildə iframe ölçüsü */
       #quiz-wrapper iframe {
         width: 98%;
         height: 70%;
@@ -391,8 +395,8 @@
     const clickAudio = document.getElementById("clickSound");
     const toggleBtn = document.getElementById("darkToggle");
 
-    // iOS yoxlaması
-    const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    // iOS/Android yoxlaması
+    const isiOS = /iPad|iPhone|iPod|Android/.test(navigator.userAgent) && !window.MSStream;
 
     // localStorage-dan son mövzunu yüklə və Dark mode vəziyyətini təyin et
     document.addEventListener("DOMContentLoaded", () => {
@@ -403,7 +407,6 @@
         toggleBtn.textContent = "☀️";
       }
       if (lastTopic) {
-        // Bir az gecikmə verərək əvvəlki vəziyyətə qayıt
         setTimeout(() => startQuiz(lastTopic), 800);
       }
     });
@@ -422,7 +425,6 @@
         const userIP = data.ip;
         userAllowed = allowedIPPrefixes.some(prefix => userIP.startsWith(prefix));
         if (!userAllowed) {
-          // Əgər icazəli IP deyilsə, böyük qırmızı “REDDOL BURDAN!” mesajı göstər
           container.innerHTML = '<h1 style="color:red; font-size:2rem; text-align:center;">REDDOL BURDAN!</h1>';
           container.style.display = "block";
         }
@@ -469,7 +471,6 @@
         btn.appendChild(circle);
       });
     }
-    // Bütün düymələrə ripple effekti və audio əlavə et
     document.addEventListener("DOMContentLoaded", () => {
       document.querySelectorAll("button").forEach(button => {
         addRippleEffect(button);
@@ -482,6 +483,10 @@
 
     // Əsas menyuya qayıt funksiyası
     function showMainMenu() {
+      // Quiz-wrapper varsa, sil
+      const prevWrapper = document.getElementById("quiz-wrapper");
+      if (prevWrapper) prevWrapper.remove();
+
       container.classList.remove('has-back', 'hidden');
       container.innerHTML = `
         <p class="section-title">Başlanğıc mövzusu:</p>
@@ -490,7 +495,6 @@
         <button class="start-btn" onclick="startQuiz('xdiak')">XDIAK</button>
         <button class="start-btn" onclick="startQuiz('diferensial')">Diferensial</button>
       `;
-      // Yenidən yeni yaradılan düymələrə ripple və audio əlavə et
       document.querySelectorAll("button").forEach(button => {
         addRippleEffect(button);
         button.addEventListener("click", () => {
@@ -500,12 +504,11 @@
       });
     }
 
-    // Mövzu seçimi funksiyası (fade out/in, localStorage-a yazma, düymələr animasiyası)
+    // Mövzu seçimi funksiyası
     function startQuiz(topic) {
-      // Əgər IP icazəli deyilsə, heç bir əməliyyat eləməsin
       if (!userAllowed) return;
-
       localStorage.setItem("lastTopic", topic);
+
       const titleTextMap = {
         'proqramlasdirma': 'Proqramlaşdırma suallarını seç:',
         'xetti': 'Xətti Cəbr suallarını seç:',
@@ -542,7 +545,6 @@
         'diferensial': ["1-100", "101-205", "206-301"]
       };
 
-      // Fade out container
       container.classList.add("hidden");
       setTimeout(() => {
         container.classList.remove("has-back", "hidden");
@@ -552,10 +554,8 @@
           <p class="section-title">${titleTextMap[topic] || 'Bölmə tapılmadı'}</p>
         `;
 
-        // Düymələri yarat
         const btnContainer = document.createElement("div");
         btnContainer.id = "btn-container";
-
         const links = linksMap[topic] || [];
         const labels = labelsMap[topic] || [];
 
@@ -568,12 +568,9 @@
         });
         container.appendChild(btnContainer);
 
-        // Fade in container
         setTimeout(() => container.classList.remove("hidden"), 50);
 
-        // Yeni yaradılan button-lara ripple və audio əlavə et
-        const newButtons = container.querySelectorAll("button");
-        newButtons.forEach(button => {
+        container.querySelectorAll("button").forEach(button => {
           addRippleEffect(button);
           button.addEventListener("click", () => {
             clickAudio.currentTime = 0;
@@ -583,9 +580,9 @@
       }, 300);
     }
 
-    // Quiz-i iframe-də açan funksiya (Tam Ekran üçün wrapper əlavə edildi)
+    // Quiz-i iframe-də açan funksiya (PC-də avtomatik tam ekran, telefonda əlavə düymələr)
     function openQuiz(link) {
-      // Əvvəlki quiz-wrapper-ı sil
+      // Əvvəlki quiz-wrapper varsa, sil
       const prevWrapper = document.getElementById("quiz-wrapper");
       if (prevWrapper) prevWrapper.remove();
 
@@ -603,12 +600,8 @@
       iframe.setAttribute("mozallowfullscreen", "");
       wrapper.appendChild(iframe);
 
-      // “Tam Ekran” düyməsi
-      const fullBtn = document.createElement("button");
-      fullBtn.id = "fullscreen-btn";
-      fullBtn.textContent = "Tam Ekran";
-      fullBtn.onclick = () => {
-        // PC-də işləyir. iOS-da bəzən bloklana bilər, amma düymə saxlanıb.
+      // PC üçün – avtomatik tam ekran rejiminə keç
+      if (!isiOS) {
         if (wrapper.requestFullscreen) {
           wrapper.requestFullscreen();
         } else if (wrapper.webkitRequestFullscreen) {
@@ -616,28 +609,59 @@
         } else if (wrapper.msRequestFullscreen) {
           wrapper.msRequestFullscreen();
         }
-      };
-      wrapper.appendChild(fullBtn);
+      }
 
-      // wrapper-ı bədənə yapışdır (container-dan üstün olsun deyə sonradan append)
+      // Telefon üçün “Tam Ekrandan Çıx” və “Quiz-i Bağla” düymələri
+      if (isiOS) {
+        const btnContainer = document.createElement("div");
+        btnContainer.id = "quiz-buttons";
+
+        // Tam Ekrandan Çıx düyməsi
+        const exitBtn = document.createElement("button");
+        exitBtn.className = "quiz-action-btn";
+        exitBtn.textContent = "Tam Ekrandan Çıx";
+        exitBtn.onclick = () => {
+          if (document.fullscreenElement) {
+            document.exitFullscreen();
+          } else if (document.webkitFullscreenElement) {
+            document.webkitExitFullscreen();
+          } else if (document.msFullscreenElement) {
+            document.msExitFullscreen();
+          }
+        };
+        btnContainer.appendChild(exitBtn);
+
+        // Quiz-i Bağla düyməsi
+        const closeBtn = document.createElement("button");
+        closeBtn.className = "quiz-action-btn";
+        closeBtn.textContent = "Quiz-i Bağla";
+        closeBtn.onclick = () => {
+          wrapper.remove();
+          showMainMenu();
+        };
+        btnContainer.appendChild(closeBtn);
+
+        wrapper.appendChild(btnContainer);
+      }
+
       document.body.appendChild(wrapper);
 
-      // Tam ekrandan çıxış event-lərini dinlə
+      // Tam ekrandan çıxış event-ləri – həm PC, həm də telefon üçün
       document.addEventListener("fullscreenchange", handleExit);
       document.addEventListener("webkitfullscreenchange", handleExit);
       document.addEventListener("msfullscreenchange", handleExit);
     }
 
-    // Tam ekrandan çıxanda wrapper-ı sil
+    // Tam ekrandan çıxanda və ya istifadə exit düyməsinə basanda wrapper-ı sil
     function handleExit() {
       const wrapper = document.getElementById("quiz-wrapper");
-      // Əgər artıq heç bir element tam ekranda deyilsə, wrapper-ı sil
       if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
         if (wrapper) {
           wrapper.remove();
           document.removeEventListener("fullscreenchange", handleExit);
           document.removeEventListener("webkitfullscreenchange", handleExit);
           document.removeEventListener("msfullscreenchange", handleExit);
+          showMainMenu();
         }
       }
     }
