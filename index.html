@@ -2,19 +2,18 @@
 <html lang="az">
 <head>
   <meta charset="UTF-8">
-  <!-- Mobil görünüş üçün -->
+  <!-- Mobil cihazlarda düzgün miqyas üçün metatag -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kenoo</title>
   <!-- Google Fonts: Poppins -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    /* Ümumi tərtibat */
+    /* ===== Ümumi Tərtibat ===== */
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
-
     body {
       font-family: 'Poppins', Arial, sans-serif;
       background: linear-gradient(135deg, #e3f2fd 0%, #ffffff 100%);
@@ -24,7 +23,6 @@
       min-height: 100vh;
       padding: 20px;
     }
-
     h1 {
       margin-bottom: 20px;
       color: #333;
@@ -32,23 +30,20 @@
       font-size: 2rem;
       text-align: center;
     }
-
     #container {
       width: 100%;
       max-width: 600px;
       background-color: #ffffff;
       border-radius: 12px;
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-      padding: 30px 20px;
+      padding: 30px 20px; /* Default padding */
       text-align: center;
       transition: transform 0.3s ease;
       position: relative;
     }
-
     #container:hover {
-      transform: translateY(-4px);
+      transform: translateY(-2px);
     }
-
     .section-title {
       font-size: 1.2rem;
       font-weight: 600;
@@ -56,27 +51,7 @@
       margin-bottom: 16px;
     }
 
-    /* Başlanğıc düymələri */
-    .start-btn {
-      padding: 14px 28px;
-      margin: 8px;
-      border: none;
-      border-radius: 8px;
-      background: linear-gradient(135deg, #42a5f5 0%, #1e88e5 100%);
-      color: #fff;
-      cursor: pointer;
-      font-size: 1rem;
-      font-weight: 600;
-      transition: background 0.3s ease, box-shadow 0.3s ease;
-      box-shadow: 0 4px 12px rgba(66, 165, 245, 0.4);
-    }
-
-    .start-btn:hover {
-      background: linear-gradient(135deg, #1e88e5 0%, #1565c0 100%);
-      box-shadow: 0 6px 16px rgba(66, 165, 245, 0.5);
-    }
-
-    /* “Geri” düyməsi */
+    /* ===== “Geri” Düyməsi ===== */
     .back-btn {
       position: absolute;
       top: 16px;
@@ -91,12 +66,36 @@
       font-weight: 500;
       transition: background 0.3s ease;
     }
-
     .back-btn:hover {
       background-color: #757575;
     }
 
-    /* Quiz seçimi düymələri */
+    /* ===== “Has Back” (mövzu seçimində) üçün əlavə padding ===== */
+    #container.has-back {
+      /* “Geri” düyməsi üstündə olduğu üçün 50px yuxarıda yerləşəcək boşluq */
+      padding-top: 50px;
+    }
+
+    /* ===== Başlanğıc Düymələri ===== */
+    .start-btn {
+      padding: 14px 28px;
+      margin: 8px;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #42a5f5 0%, #1e88e5 100%);
+      color: #fff;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 4px 12px rgba(66, 165, 245, 0.4);
+    }
+    .start-btn:hover {
+      background: linear-gradient(135deg, #1e88e5 0%, #1565c0 100%);
+      box-shadow: 0 6px 16px rgba(66, 165, 245, 0.5);
+    }
+
+    /* ===== Quiz Seçim Düymələri ===== */
     #btn-container {
       display: flex;
       flex-wrap: wrap;
@@ -104,7 +103,6 @@
       gap: 12px;
       margin-top: 20px;
     }
-
     .quiz-btn {
       flex: 1 1 120px;
       max-width: 160px;
@@ -120,24 +118,23 @@
       box-shadow: 0 4px 12px rgba(255, 183, 77, 0.4);
       text-align: center;
     }
-
     .quiz-btn:hover {
       background: linear-gradient(135deg, #ffa726 0%, #fb8c00 100%);
       transform: translateY(-3px);
       box-shadow: 0 6px 16px rgba(255, 183, 77, 0.5);
     }
 
-    /* Iframe tərtibatı */
+    /* ===== Iframe tərtibatı ===== */
     iframe {
       width: 100%;
-      height: 60vh; /* Kiçik ekranlar üçün hündürlük 60vh */
+      height: 60vh; /* Kiçik ekran üçün 60vh; media query-də daha da kiçildilir */
       border: none;
       border-radius: 12px;
       margin-top: 24px;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
     }
 
-    /* Xəta mesajı */
+    /* ===== Xəta Mesajı ===== */
     #error-message {
       color: #d32f2f;
       font-weight: 600;
@@ -145,34 +142,33 @@
       margin-top: 20px;
     }
 
-    /* Mobil optimallaşdırma */
+    /* ===== Mobil optimallaşdırma ===== */
     @media (max-width: 600px) {
       body {
         padding: 10px;
       }
-
       h1 {
         font-size: 1.5rem;
         margin-bottom: 16px;
       }
-
       #container {
         padding: 20px 12px;
       }
-
+      #container.has-back {
+        /* Mobil üçün “Geri” üst boşluğunu azca kiçiltmək mümkündür (əgər lazım olsa) */
+        padding-top: 45px;
+      }
       .start-btn, .quiz-btn {
         width: 100%;
         max-width: unset;
         font-size: 1rem;
         padding: 12px 0;
       }
-
       #btn-container {
         gap: 8px;
       }
-
       iframe {
-        height: 50vh; /* Daha kiçik cihazlarda çox yer tutmasın */
+        height: 50vh; /* Kiçik mobil cihazlarda səhifədə çox boşluq qalmasın deyə 50vh */
       }
     }
   </style>
@@ -180,7 +176,7 @@
 <body>
   <h1>Quiz Mövzularını Seçin</h1>
   <div id="container">
-    <!-- Başlanğıc menyusu -->
+    <!-- Əsas menyu şablonu (geri düyməsi olmadan) -->
     <p class="section-title">Başlanğıc mövzusu:</p>
     <button class="start-btn" onclick="startQuiz('proqramlasdirma')">Proqramlaşdırma</button>
     <button class="start-btn" onclick="startQuiz('xetti')">Xətti Cəbr</button>
@@ -199,11 +195,10 @@
       "94.20.",
       "149.126."
     ];
-
     let userAllowed = false;
     const container = document.getElementById("container");
 
-    // HTML şablonu: əsas menyu (geri-qayıtmaq üçün bu strukturu istifadə edəcəyik)
+    // Əsas menyunu yenidən göstərən şablon
     const mainMenuHTML = `
       <p class="section-title">Başlanğıc mövzusu:</p>
       <button class="start-btn" onclick="startQuiz('proqramlasdirma')">Proqramlaşdırma</button>
@@ -213,15 +208,16 @@
       <p id="error-message" style="display: none;">Reddol burdan.</p>
     `;
 
-    // IP yoxlaması
+    // iOS yoxlaması üçün dəyişən
+    const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+    // IP yoxlaması: əgər icazəli prefix-lərdən biriylə başlayırsa davam et, yoxdursa mesaj göstər
     async function checkIP() {
       try {
         const res = await fetch('https://api.ipify.org?format=json');
         const data = await res.json();
         const userIP = data.ip;
-
         userAllowed = allowedIPPrefixes.some(prefix => userIP.startsWith(prefix));
-
         if (!userAllowed) {
           container.style.display = "none";
           document.getElementById("error-message").style.display = "block";
@@ -231,12 +227,14 @@
       }
     }
 
-    // Əsas menyunu yenidən göstərən funksiya
+    // Əsas menyuya qayıtmaq üçün funksiya
     function showMainMenu() {
+      // “Has-back” sinifini sil, yəni artıq geri düyməsi əlavə deyil
+      container.classList.remove('has-back');
       container.innerHTML = mainMenuHTML;
     }
 
-    // Yeni mövzu seçimi ekranını göstərən funksiya
+    // Mövzu seçimi ekranını göstərən funksiya
     function startQuiz(topic) {
       if (!userAllowed) return;
 
@@ -286,17 +284,20 @@
           titleText = 'Bölmə tapılmadı';
       }
 
-      // “Geri” düyməsini və başlığı əlavə et
+      // “Has-back” sinifini əlavə et ki, containerə yuxarıdan boşluq verilsin
+      container.classList.add('has-back');
+
+      // Container-in içini tamamilə dəyişərək “Geri” düyməsi + başlığı yerləşdiririk
       container.innerHTML = `
         <button class="back-btn" onclick="showMainMenu()">‹ Geri</button>
         <p class="section-title">${titleText}</p>
       `;
 
-      // Seçim düymələrinin konteynerini yarat
+      // Seçim düymələri üçün konteyneri yaradıb əlavə edək
       const btnContainer = document.createElement("div");
       btnContainer.id = "btn-container";
 
-      // Hər bir link üçün düymə əlavə et
+      // Hər bir linkə uyğun düymə əlavə edirik
       links.forEach((link, index) => {
         const btn = document.createElement("button");
         btn.className = "quiz-btn";
@@ -304,32 +305,41 @@
         btn.onclick = () => openQuiz(link);
         btnContainer.appendChild(btn);
       });
-
       container.appendChild(btnContainer);
     }
 
-    // Quiz səhifəsini iframe-də açan funksiya
+    // Quiz-i iframe-də açan funksiya
     function openQuiz(link) {
+      // Əgər əvvəldən açılmış iframe varsa, sil:
       const existingIframe = document.getElementById("fullscreen-quiz");
       if (existingIframe) existingIframe.remove();
 
+      // Yeni iframe yaradıb bədənə əlavə et
       const iframe = document.createElement("iframe");
       iframe.src = link;
       iframe.id = "fullscreen-quiz";
-      iframe.allowFullscreen = true;
+      iframe.allow = "fullscreen";               // Müxtəlif brauzerlər üçün icazə
+      iframe.allowFullscreen = true;              // Standart atribut
+      iframe.setAttribute("webkitallowfullscreen", "");  // WebKit (iOS/Safari)
+      iframe.setAttribute("mozallowfullscreen", "");     // Firefox
+
       document.body.appendChild(iframe);
 
-      // Tam ekran rejiminə keçid
-      if (iframe.requestFullscreen) iframe.requestFullscreen();
-      else if (iframe.webkitRequestFullscreen) iframe.webkitRequestFullscreen();
-      else if (iframe.msRequestFullscreen) iframe.msRequestFullscreen();
+      // iOS-dursa tam ekran etmə, çünki iOS-da bu kod bloklana bilər
+      if (!isiOS) {
+        // Tam ekran rejiminə keçid
+        if (iframe.requestFullscreen) iframe.requestFullscreen();
+        else if (iframe.webkitRequestFullscreen) iframe.webkitRequestFullscreen();
+        else if (iframe.msRequestFullscreen) iframe.msRequestFullscreen();
+      }
 
+      // Tam ekrandan çıxdığı an iframe-i sil
       document.addEventListener("fullscreenchange", handleExit);
       document.addEventListener("webkitfullscreenchange", handleExit);
       document.addEventListener("msfullscreenchange", handleExit);
     }
 
-    // Tam ekrandan çıxarkən iframe-i sil
+    // Tam ekrandan çıxış baş verəndə iframe-i oradan sil və event listener-ları təmizlə
     function handleExit() {
       const iframe = document.getElementById("fullscreen-quiz");
       if (!document.fullscreenElement && iframe) {
@@ -340,6 +350,7 @@
       }
     }
 
+    // Səhifə yüklənincə IP yoxlaması icra et
     window.onload = checkIP;
   </script>
 </body>
