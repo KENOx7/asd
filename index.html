@@ -580,7 +580,7 @@
       }, 300);
     }
 
-    // Quiz-i iframe-də açan funksiya (PC-də avtomatik tam ekran, telefonda əlavə düymələr)
+    // Quiz-i iframe-də açan funksiya
     function openQuiz(link) {
       // Əvvəlki quiz-wrapper varsa, sil
       const prevWrapper = document.getElementById("quiz-wrapper");
@@ -603,7 +603,7 @@
       // PC üçün – avtomatik tam ekran rejiminə keç
       if (!isiOS) {
         if (wrapper.requestFullscreen) {
-          wrapper.requestFullscreen();
+          wrapper.requestFullscreen().catch(()=>{}); // bəzi brauzerlərdə izin lazım ola bilər
         } else if (wrapper.webkitRequestFullscreen) {
           wrapper.webkitRequestFullscreen();
         } else if (wrapper.msRequestFullscreen) {
@@ -611,10 +611,25 @@
         }
       }
 
-      // Telefon üçün “Tam Ekrandan Çıx” və “Quiz-i Bağla” düymələri
+      // Mobil üçün – “Tam Ekran”, “Tam Ekrandan Çıx” və “Quiz-i Bağla” düymələri
       if (isiOS) {
         const btnContainer = document.createElement("div");
         btnContainer.id = "quiz-buttons";
+
+        // Tam Ekran düyməsi
+        const enterBtn = document.createElement("button");
+        enterBtn.className = "quiz-action-btn";
+        enterBtn.textContent = "Tam Ekran";
+        enterBtn.onclick = () => {
+          if (wrapper.requestFullscreen) {
+            wrapper.requestFullscreen().catch(()=>{});
+          } else if (wrapper.webkitRequestFullscreen) {
+            wrapper.webkitRequestFullscreen();
+          } else if (wrapper.msRequestFullscreen) {
+            wrapper.msRequestFullscreen();
+          }
+        };
+        btnContainer.appendChild(enterBtn);
 
         // Tam Ekrandan Çıx düyməsi
         const exitBtn = document.createElement("button");
@@ -646,13 +661,13 @@
 
       document.body.appendChild(wrapper);
 
-      // Tam ekrandan çıxış event-ləri – həm PC, həm də telefon üçün
+      // Tam ekrandan çıxış event-ləri – həm PC, həm də mobil üçün
       document.addEventListener("fullscreenchange", handleExit);
       document.addEventListener("webkitfullscreenchange", handleExit);
       document.addEventListener("msfullscreenchange", handleExit);
     }
 
-    // Tam ekrandan çıxanda və ya istifadə exit düyməsinə basanda wrapper-ı sil
+    // Tam ekrandan çıxanda və ya exit düyməsinə basanda wrapper-ı sil
     function handleExit() {
       const wrapper = document.getElementById("quiz-wrapper");
       if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
