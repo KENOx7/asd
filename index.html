@@ -480,25 +480,25 @@
       };
       const linksMap = {
         'proqramlasdirma': [
-          "683dddfd79bab9c70d96170f",
-          "683dde151f8214ac74f7703d",
-          "683dde314708a5aad48cb67f"
+          "https://quizizz.com/embed/quiz/683dddfd79bab9c70d96170f",
+          "https://quizizz.com/embed/quiz/683dde151f8214ac74f7703d",
+          "https://quizizz.com/embed/quiz/683dde314708a5aad48cb67f"
         ],
         'xetti': [
-          "683f58989ba449e01c456667",
-          "683f58af9413297320bc29f1",
-          "683f58c21258dca9091f1082"
+          "https://quizizz.com/embed/quiz/683f58989ba449e01c456667",
+          "https://quizizz.com/embed/quiz/683f58af9413297320bc29f1",
+          "https://quizizz.com/embed/quiz/683f58c21258dca9091f1082"
         ],
         'xdiak': [
-          "683f5cf4c777386684e14481",
-          "683f5d1279bab9c70d96c2b5",
-          "683f5d2eeee6434cec6396e2",
-          "683f5d50eee6434cec6396e7"
+          "https://quizizz.com/embed/quiz/683f5cf4c777386684e14481",
+          "https://quizizz.com/embed/quiz/683f5d1279bab9c70d96c2b5",
+          "https://quizizz.com/embed/quiz/683f5d2eeee6434cec6396e2",
+          "https://quizizz.com/embed/quiz/683f5d50eee6434cec6396e7"
         ],
         'diferensial': [
-          "683f60a44708a5aad48d66d1",
-          "683f60b29413297320bc2baf",
-          "683f60d33740abec43503e14"
+          "https://quizizz.com/embed/quiz/683f60a44708a5aad48d66d1",
+          "https://quizizz.com/embed/quiz/683f60b29413297320bc2baf",
+          "https://quizizz.com/embed/quiz/683f60d33740abec43503e14"
         ]
       };
       const labelsMap = {
@@ -522,14 +522,14 @@
         const btnContainer = document.createElement("div");
         btnContainer.id = "btn-container";
 
-        const quizIds = linksMap[topic] || [];
+        const links = linksMap[topic] || [];
         const labels = labelsMap[topic] || [];
 
-        quizIds.forEach((id, index) => {
+        links.forEach((link, index) => {
           const btn = document.createElement("button");
           btn.className = "quiz-btn";
           btn.textContent = labels[index];
-          btn.onclick = () => openQuiz(id);
+          btn.onclick = () => openQuiz(link);
           btnContainer.appendChild(btn);
         });
         container.appendChild(btnContainer);
@@ -549,20 +549,15 @@
       }, 300);
     }
 
-    // Quiz-i açan funksiya (iOS üçün fallback)
-    function openQuiz(id) {
-      const proLink = `https://quizizz.com/pro/join?gc=${id}`;
-      if (isiOS) {
-        window.open(proLink, '_blank');
-        return;
-      }
+    // Quiz-i iframe-də açan funksiya
+    function openQuiz(link) {
       // Əvvəlki iframe-i sil
       const existingIframe = document.getElementById("fullscreen-quiz");
       if (existingIframe) existingIframe.remove();
 
       // Yeni iframe yaradıb bədənə əlavə et
       const iframe = document.createElement("iframe");
-      iframe.src = proLink;
+      iframe.src = link;
       iframe.id = "fullscreen-quiz";
       iframe.allow = "fullscreen";
       iframe.allowFullscreen = true;
