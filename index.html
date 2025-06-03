@@ -2,76 +2,153 @@
 <html lang="az">
 <head>
   <meta charset="UTF-8">
-  <title>kenoo</title>
+  <title>Kenoo Quiz Seçim</title>
+  <!-- Google Fonts: Poppins -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    body {
+    /* Ümumi tərtibat */
+    * {
+      box-sizing: border-box;
       margin: 0;
-      padding: 20px;
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Poppins', Arial, sans-serif;
+      background: linear-gradient(135deg, #e3f2fd 0%, #ffffff 100%);
       display: flex;
       flex-direction: column;
       align-items: center;
+      min-height: 100vh;
+      padding: 20px;
     }
 
-    #container {
-      min-height: 100px;
-      width: 100%;
-      max-width: 600px;
-      background-color: #fff;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      padding: 20px;
-      box-sizing: border-box;
+    h1 {
+      margin-bottom: 20px;
+      color: #333;
+      font-weight: 600;
+      font-size: 2rem;
       text-align: center;
     }
 
-    .quiz-btn, .start-btn {
-      padding: 12px 24px;
-      margin: 10px 5px;
-      border: none;
-      border-radius: 6px;
-      background-color: #007bff;
-      color: white;
-      cursor: pointer;
-      font-size: 16px;
-      transition: background-color 0.3s ease;
-    }
-
-    .quiz-btn:hover, .start-btn:hover {
-      background-color: #0056b3;
-    }
-
-    iframe {
+    #container {
       width: 100%;
-      height: 80vh;
-      border: none;
-      margin-top: 20px;
-      border-radius: 8px;
+      max-width: 600px;
+      background-color: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+      padding: 30px 20px;
+      text-align: center;
+      transition: transform 0.3s ease;
     }
 
+    #container:hover {
+      transform: translateY(-4px);
+    }
+
+    .section-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 16px;
+    }
+
+    /* Başlanğıc düymələri */
+    .start-btn {
+      padding: 14px 28px;
+      margin: 8px;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #42a5f5 0%, #1e88e5 100%);
+      color: #fff;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 4px 12px rgba(66, 165, 245, 0.4);
+    }
+
+    .start-btn:hover {
+      background: linear-gradient(135deg, #1e88e5 0%, #1565c0 100%);
+      box-shadow: 0 6px 16px rgba(66, 165, 245, 0.5);
+    }
+
+    /* Quiz seçimi düymələri */
     #btn-container {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 10px;
-      margin: 20px 0;
+      gap: 12px;
+      margin-top: 20px;
     }
 
+    .quiz-btn {
+      flex: 1 1 120px;
+      max-width: 160px;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #ffb74d 0%, #ffa726 100%);
+      color: #fff;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+      box-shadow: 0 4px 12px rgba(255, 183, 77, 0.4);
+      text-align: center;
+    }
+
+    .quiz-btn:hover {
+      background: linear-gradient(135deg, #ffa726 0%, #fb8c00 100%);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(255, 183, 77, 0.5);
+    }
+
+    /* Iframe tərtibatı */
+    iframe {
+      width: 100%;
+      height: 80vh;
+      border: none;
+      border-radius: 12px;
+      margin-top: 24px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Xəta mesajı */
+    #error-message {
+      color: #d32f2f;
+      font-weight: 600;
+      font-size: 1rem;
+      margin-top: 20px;
+    }
+
+    /* Mobil optimallaşdırma */
     @media (max-width: 600px) {
-      .quiz-btn, .start-btn {
+      #container {
+        padding: 20px 10px;
+      }
+
+      .start-btn, .quiz-btn {
         width: 100%;
-        font-size: 18px;
+        max-width: unset;
+        font-size: 1rem;
+      }
+
+      #btn-container {
+        gap: 8px;
       }
     }
   </style>
 </head>
 <body>
+  <h1>Quiz Mövzularını Seçin</h1>
   <div id="container">
+    <p class="section-title">Başlanğıc mövzusu:</p>
     <button class="start-btn" onclick="startQuiz('proqramlasdirma')">Proqramlaşdırma</button>
     <button class="start-btn" onclick="startQuiz('xetti')">Xətti Cəbr</button>
     <button class="start-btn" onclick="startQuiz('xdiak')">XDIAK</button>
     <button class="start-btn" onclick="startQuiz('diferensial')">Diferensial</button>
+    <p id="error-message" style="display: none;">Reddol burdan.</p>
   </div>
 
   <script>
@@ -96,7 +173,8 @@
         userAllowed = allowedIPPrefixes.some(prefix => userIP.startsWith(prefix));
 
         if (!userAllowed) {
-          document.getElementById("container").innerHTML = "<p style='color:red;'>Reddol burdan.</p>";
+          document.getElementById("container").style.display = "none";
+          document.getElementById("error-message").style.display = "block";
         }
       } catch (err) {
         console.error("Xəta baş verdi:", err);
@@ -107,13 +185,13 @@
       if (!userAllowed) return;
 
       const container = document.getElementById("container");
-      let title = '';
+      let titleText = '';
       let links = [];
       let labels = [];
 
       switch (topic) {
         case 'proqramlasdirma':
-          title = 'Proqramlaşdırma suallarını seç:';
+          titleText = 'Proqramlaşdırma suallarını seç:';
           links = [
             "https://quizizz.com/embed/quiz/683dddfd79bab9c70d96170f",
             "https://quizizz.com/embed/quiz/683dde151f8214ac74f7703d",
@@ -122,7 +200,7 @@
           labels = ["1-110", "111-220", "221-350"];
           break;
         case 'xetti':
-          title = 'Xətti Cəbr suallarını seç:';
+          titleText = 'Xətti Cəbr suallarını seç:';
           links = [
             "https://quizizz.com/embed/quiz/683f58989ba449e01c456667",
             "https://quizizz.com/embed/quiz/683f58af9413297320bc29f1",
@@ -131,7 +209,7 @@
           labels = ["1-111", "112-218", "219-320"];
           break;
         case 'xdiak':
-          title = 'XDIAK suallarını seç:';
+          titleText = 'XDIAK suallarını seç:';
           links = [
             "https://quizizz.com/embed/quiz/683f5cf4c777386684e14481",
             "https://quizizz.com/embed/quiz/683f5d1279bab9c70d96c2b5",
@@ -141,7 +219,7 @@
           labels = ["1-100", "101-200", "201-300", "301-425"];
           break;
         case 'diferensial':
-          title = 'Diferensial suallarını seç:';
+          titleText = 'Diferensial suallarını seç:';
           links = [
             "https://quizizz.com/embed/quiz/683f60a44708a5aad48d66d1",
             "https://quizizz.com/embed/quiz/683f60b29413297320bc2baf",
@@ -150,14 +228,17 @@
           labels = ["1-100", "101-205", "206-301"];
           break;
         default:
-          title = 'Bölmə tapılmadı';
+          titleText = 'Bölmə tapılmadı';
       }
 
-      container.innerHTML = `<p style='font-size:18px; font-weight:bold;'>${title}</p>`;
+      // Mövzu başlığını container içərisinə əlavə et
+      container.innerHTML = `<p class="section-title">${titleText}</p>`;
 
+      // Düymə konteyneri yarat
       const btnContainer = document.createElement("div");
       btnContainer.id = "btn-container";
 
+      // Hər bir link üçün düymə əlavə et
       links.forEach((link, index) => {
         const btn = document.createElement("button");
         btn.className = "quiz-btn";
@@ -179,6 +260,7 @@
       iframe.allowFullscreen = true;
       document.body.appendChild(iframe);
 
+      // Tam ekran rejiminə keçid
       if (iframe.requestFullscreen) iframe.requestFullscreen();
       else if (iframe.webkitRequestFullscreen) iframe.webkitRequestFullscreen();
       else if (iframe.msRequestFullscreen) iframe.msRequestFullscreen();
