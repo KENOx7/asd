@@ -361,16 +361,17 @@
     // iOS yoxlaması
     const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
-    // localStorage-dan son mövzunu yüklə və Dark mode vəziyyətini təyin et
+    // localStorage-dan son mövzunu yüklə
     document.addEventListener("DOMContentLoaded", () => {
       const lastTopic = localStorage.getItem("lastTopic");
+      // Dark mode vəziyyətini yoxla
       const currentMode = localStorage.getItem("theme");
       if (currentMode === "dark") {
         document.body.classList.add("dark");
         toggleBtn.textContent = "☀️";
       }
       if (lastTopic) {
-        // Bir az gecikmə verərək əvvəlki vəziyyətə qayıt
+        // Azərbaycan vaxtı ilə səhifə yüklənəndə bir az gecikmə verərək əvvəlki vəziyyətə qayıt
         setTimeout(() => startQuiz(lastTopic), 800);
       }
     });
@@ -389,9 +390,8 @@
         const userIP = data.ip;
         userAllowed = allowedIPPrefixes.some(prefix => userIP.startsWith(prefix));
         if (!userAllowed) {
-          // Əgər icazəli IP deyilsə, container-in içini "REDDOL BURDAN!" mesajı ilə əvəz et
-          container.innerHTML = '<h1 style="color:red; font-size:2rem; text-align:center;">REDDOL BURDAN!</h1>';
-          container.style.display = "block";
+          container.style.display = "none";
+          showToast("Sizin IP icazəli deyil!");
         }
       } catch (err) {
         console.error("Xəta baş verdi:", err);
@@ -469,7 +469,6 @@
 
     // Mövzu seçimi funksiyası (fade out/in, localStorage-a yazma, düymələr animasiyası)
     function startQuiz(topic) {
-      // Əgər IP icazəli deyilsə, heç bir əməliyyat eləməsin
       if (!userAllowed) return;
 
       localStorage.setItem("lastTopic", topic);
@@ -550,13 +549,13 @@
       }, 300);
     }
 
-    // Quiz-i iframe-də açan funksiya (fullscreen kodları tamamilə çıxarıldı)
+    // Quiz-i iframe-də açan funksiya
     function openQuiz(link) {
       // Əvvəlki iframe-i sil
       const existingIframe = document.getElementById("fullscreen-quiz");
       if (existingIframe) existingIframe.remove();
 
-      // Yeni iframe yaradıb container-in altında əlavə et
+      // Yeni iframe yaradıb bədənə əlavə et
       const iframe = document.createElement("iframe");
       iframe.src = link;
       iframe.id = "fullscreen-quiz";
@@ -564,9 +563,29 @@
       iframe.allowFullscreen = true;
       iframe.setAttribute("webkitallowfullscreen", "");
       iframe.setAttribute("mozallowfullscreen", "");
-      // iframe-i bədən əvəzinə container-dan sonra əlavə edirik
       document.body.appendChild(iframe);
-      // iOS-da da əlavə fullscreen cəhdləri olmadığı üçün bu kod sadəcə iframe-i yükləyir
+
+      // Tam ekran (iOS-da bloklanmaya görə yoxlanır)
+      if (!isiOS) {
+        if (iframe.requestFullscreen) iframe.requestFullscreen();
+        else if (iframe.webkitRequestFullscreen) iframe.webkitRequestFullscreen();
+        else if (iframe.msRequestFullscreen) iframe.msRequestFullscreen();
+      }
+
+      document.addEventListener("fullscreenchange", handleExit);
+      document.addEventListener("webkitfullscreenchange", handleExit);
+      document.addEventListener("msfullscreenchange", handleExit);
+    }
+
+    // Tam ekrandan çıxış
+    function handleExit() {
+      const iframe = document.getElementById("fullscreen-quiz");
+      if (!document.fullscreenElement && iframe) {
+        iframe.remove();
+        document.removeEventListener("fullscreenchange", handleExit);
+        document.removeEventListener("webkitfullscreenchange", handleExit);
+        document.removeEventListener("msfullscreenchange", handleExit);
+      }
     }
 
     // IP yoxlamasını səhifə yüklənəndə işə sal
