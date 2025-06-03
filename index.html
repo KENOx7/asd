@@ -70,6 +70,7 @@
   <div id="container">
     <button class="start-btn" onclick="startQuiz('proqramlasdirma')">Proqramlaşdırma</button>
     <button class="start-btn" onclick="startQuiz('xetti')">Xətti Cəbr</button>
+    <button class="start-btn" onclick="startQuiz('xdiak')">XDIAK</button>
   </div>
 
   <script>
@@ -105,28 +106,44 @@
       if (!userAllowed) return;
 
       const container = document.getElementById("container");
-      container.innerHTML = `<p style='font-size:18px; font-weight:bold;'>${topic === 'proqramlasdirma' ? 'Proqramlaşdırma' : 'Xətti Cəbr'} suallarını seç:</p>`;
+      let title = '';
+      let links = [];
+      let labels = [];
 
-      const quizData = {
-        proqramlasdirma: {
-          links: [
+      switch (topic) {
+        case 'proqramlasdirma':
+          title = 'Proqramlaşdırma suallarını seç:';
+          links = [
             "https://quizizz.com/embed/quiz/683dddfd79bab9c70d96170f",
             "https://quizizz.com/embed/quiz/683dde151f8214ac74f7703d",
             "https://quizizz.com/embed/quiz/683dde314708a5aad48cb67f"
-          ],
-          labels: ["1-110", "111-220", "221-350"]
-        },
-        xetti: {
-          links: [
+          ];
+          labels = ["1-110", "111-220", "221-350"];
+          break;
+        case 'xetti':
+          title = 'Xətti Cəbr suallarını seç:';
+          links = [
             "https://quizizz.com/embed/quiz/683f58989ba449e01c456667",
             "https://quizizz.com/embed/quiz/683f58af9413297320bc29f1",
             "https://quizizz.com/embed/quiz/683f58c21258dca9091f1082"
-          ],
-          labels: ["1-111", "112-218", "219-320"]
-        }
-      };
+          ];
+          labels = ["1-111", "112-218", "219-320"];
+          break;
+        case 'xdiak':
+          title = 'XDIAK suallarını seç:';
+          links = [
+            "https://quizizz.com/embed/quiz/683f5cf4c777386684e14481",
+            "https://quizizz.com/embed/quiz/683f5d1279bab9c70d96c2b5",
+            "https://quizizz.com/embed/quiz/683f5d2eeee6434cec6396e2",
+            "https://quizizz.com/embed/quiz/683f5d50eee6434cec6396e7"
+          ];
+          labels = ["1-100", "101-200", "201-300", "301-425"];
+          break;
+        default:
+          title = 'Bölmə tapılmadı';
+      }
 
-      const { links, labels } = quizData[topic];
+      container.innerHTML = `<p style='font-size:18px; font-weight:bold;'>${title}</p>`;
 
       const btnContainer = document.createElement("div");
       btnContainer.id = "btn-container";
