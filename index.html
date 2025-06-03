@@ -111,13 +111,15 @@
         "https://quizizz.com/embed/quiz/683dde314708a5aad48cb67f"
       ];
 
+      const labels = ["1-110", "111-220", "221-350"];
+
       const btnContainer = document.createElement("div");
       btnContainer.id = "btn-container";
 
       links.forEach((link, index) => {
         const btn = document.createElement("button");
         btn.className = "quiz-btn";
-        btn.textContent = (index + 1).toString();
+        btn.textContent = labels[index];
         btn.onclick = () => openQuiz(link);
         btnContainer.appendChild(btn);
       });
