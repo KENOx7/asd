@@ -68,7 +68,8 @@
 </head>
 <body>
   <div id="container">
-    <button class="start-btn" onclick="startQuiz()">Proqramlaşdırma</button>
+    <button class="start-btn" onclick="startQuiz('proqramlasdirma')">Proqramlaşdırma</button>
+    <button class="start-btn" onclick="startQuiz('xetti')">Xətti Cəbr</button>
   </div>
 
   <script>
@@ -100,19 +101,32 @@
       }
     }
 
-    function startQuiz() {
+    function startQuiz(topic) {
       if (!userAllowed) return;
 
       const container = document.getElementById("container");
-      container.innerHTML = "<p style='font-size:18px; font-weight:bold;'>Sualları seç:</p>";
+      container.innerHTML = `<p style='font-size:18px; font-weight:bold;'>${topic === 'proqramlasdirma' ? 'Proqramlaşdırma' : 'Xətti Cəbr'} suallarını seç:</p>`;
 
-      const links = [
-        "https://quizizz.com/embed/quiz/683dddfd79bab9c70d96170f",
-        "https://quizizz.com/embed/quiz/683dde151f8214ac74f7703d",
-        "https://quizizz.com/embed/quiz/683dde314708a5aad48cb67f"
-      ];
+      const quizData = {
+        proqramlasdirma: {
+          links: [
+            "https://quizizz.com/embed/quiz/683dddfd79bab9c70d96170f",
+            "https://quizizz.com/embed/quiz/683dde151f8214ac74f7703d",
+            "https://quizizz.com/embed/quiz/683dde314708a5aad48cb67f"
+          ],
+          labels: ["1-110", "111-220", "221-350"]
+        },
+        xetti: {
+          links: [
+            "https://quizizz.com/admin/quiz/683f58989ba449e01c456667",
+            "https://quizizz.com/admin/quiz/683f58af9413297320bc29f1",
+            "https://quizizz.com/admin/quiz/683f58c21258dca9091f1082/edit"
+          ],
+          labels: ["1-111", "112-218", "219-320"]
+        }
+      };
 
-      const labels = ["1-110", "111-220", "221-350"];
+      const { links, labels } = quizData[topic];
 
       const btnContainer = document.createElement("div");
       btnContainer.id = "btn-container";
