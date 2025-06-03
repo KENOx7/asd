@@ -117,7 +117,6 @@
       transition: transform 0.3s ease, opacity 0.4s ease;
       position: relative;
       opacity: 1;
-      z-index: 1;
     }
     #container.hidden {
       opacity: 0;
@@ -147,7 +146,6 @@
       font-weight: 500;
       transition: background 0.3s ease;
       overflow: hidden;
-      z-index: 2;
     }
     .back-btn:hover {
       background-color: #757575;
@@ -236,26 +234,14 @@
       }
     }
 
-    /* ===== Iframe və Tam Ekran Düyməsi Tərtibatı ===== */
-    #quiz-wrapper {
-      position: fixed;
-      top: 0; left: 0;
+    /* ===== Iframe tərtibatı ===== */
+    iframe {
       width: 100%;
-      height: 100%;
-      background-color: rgba(0,0,0,0.8);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 999; /* loader və container-dan üstün */
-    }
-    #quiz-wrapper iframe {
-      width: 90%;
-      height: 80%;
+      height: 60vh;
       border: none;
       border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-      background-color: #fff;
+      margin-top: 24px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
     }
 
     /* ===== Xəta Mesajı (Toast) ===== */
@@ -298,7 +284,6 @@
       color: var(--text-color);
       font-size: 1rem;
       transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-      z-index: 1000;
     }
     .dark-toggle:hover {
       background-color: rgba(0,0,0,0.1);
@@ -328,10 +313,8 @@
       #btn-container {
         gap: 8px;
       }
-      /* Mobildə iframe ölçüsü */
-      #quiz-wrapper iframe {
-        width: 98%;
-        height: 70%;
+      iframe {
+        height: 50vh;
       }
     }
   </style>
@@ -375,8 +358,8 @@
     const clickAudio = document.getElementById("clickSound");
     const toggleBtn = document.getElementById("darkToggle");
 
-    // iOS/Android yoxlaması (yalnız PC‐də tam ekran üçün istifadə olunacaq)
-    const isiOS = /iPad|iPhone|iPod|Android/.test(navigator.userAgent) && !window.MSStream;
+    // iOS yoxlaması
+    const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
     // localStorage-dan son mövzunu yüklə və Dark mode vəziyyətini təyin et
     document.addEventListener("DOMContentLoaded", () => {
@@ -387,6 +370,7 @@
         toggleBtn.textContent = "☀️";
       }
       if (lastTopic) {
+        // Bir az gecikmə verərək əvvəlki vəziyyətə qayıt
         setTimeout(() => startQuiz(lastTopic), 800);
       }
     });
@@ -405,6 +389,7 @@
         const userIP = data.ip;
         userAllowed = allowedIPPrefixes.some(prefix => userIP.startsWith(prefix));
         if (!userAllowed) {
+          // Əgər icazəli IP deyilsə, container-in içini "REDDOL BURDAN!" mesajı ilə əvəz et
           container.innerHTML = '<h1 style="color:red; font-size:2rem; text-align:center;">REDDOL BURDAN!</h1>';
           container.style.display = "block";
         }
@@ -451,6 +436,7 @@
         btn.appendChild(circle);
       });
     }
+    // Bütün düymələrə ripple effekti və audio əlavə et
     document.addEventListener("DOMContentLoaded", () => {
       document.querySelectorAll("button").forEach(button => {
         addRippleEffect(button);
@@ -463,9 +449,6 @@
 
     // Əsas menyuya qayıt funksiyası
     function showMainMenu() {
-      const prevWrapper = document.getElementById("quiz-wrapper");
-      if (prevWrapper) prevWrapper.remove();
-
       container.classList.remove('has-back', 'hidden');
       container.innerHTML = `
         <p class="section-title">Başlanğıc mövzusu:</p>
@@ -474,6 +457,7 @@
         <button class="start-btn" onclick="startQuiz('xdiak')">XDIAK</button>
         <button class="start-btn" onclick="startQuiz('diferensial')">Diferensial</button>
       `;
+      // Yenidən yeni yaradılan düymələrə ripple və audio əlavə et
       document.querySelectorAll("button").forEach(button => {
         addRippleEffect(button);
         button.addEventListener("click", () => {
@@ -483,11 +467,12 @@
       });
     }
 
-    // Mövzu seçimi funksiyası
+    // Mövzu seçimi funksiyası (fade out/in, localStorage-a yazma, düymələr animasiyası)
     function startQuiz(topic) {
+      // Əgər IP icazəli deyilsə, heç bir əməliyyat eləməsin
       if (!userAllowed) return;
-      localStorage.setItem("lastTopic", topic);
 
+      localStorage.setItem("lastTopic", topic);
       const titleTextMap = {
         'proqramlasdirma': 'Proqramlaşdırma suallarını seç:',
         'xetti': 'Xətti Cəbr suallarını seç:',
@@ -524,6 +509,7 @@
         'diferensial': ["1-100", "101-205", "206-301"]
       };
 
+      // Fade out container
       container.classList.add("hidden");
       setTimeout(() => {
         container.classList.remove("has-back", "hidden");
@@ -533,8 +519,10 @@
           <p class="section-title">${titleTextMap[topic] || 'Bölmə tapılmadı'}</p>
         `;
 
+        // Düymələri yarat
         const btnContainer = document.createElement("div");
         btnContainer.id = "btn-container";
+
         const links = linksMap[topic] || [];
         const labels = labelsMap[topic] || [];
 
@@ -547,9 +535,12 @@
         });
         container.appendChild(btnContainer);
 
+        // Fade in container
         setTimeout(() => container.classList.remove("hidden"), 50);
 
-        container.querySelectorAll("button").forEach(button => {
+        // Yeni yaradılan button-lara ripple və audio əlavə et
+        const newButtons = container.querySelectorAll("button");
+        newButtons.forEach(button => {
           addRippleEffect(button);
           button.addEventListener("click", () => {
             clickAudio.currentTime = 0;
@@ -559,57 +550,23 @@
       }, 300);
     }
 
-    // Quiz-i iframe-də açan funksiya (yalnız PC üçün avtomatik full‐screen)
+    // Quiz-i iframe-də açan funksiya (fullscreen kodları tamamilə çıxarıldı)
     function openQuiz(link) {
-      // Əvvəlki quiz-wrapper varsa, sil
-      const prevWrapper = document.getElementById("quiz-wrapper");
-      if (prevWrapper) prevWrapper.remove();
+      // Əvvəlki iframe-i sil
+      const existingIframe = document.getElementById("fullscreen-quiz");
+      if (existingIframe) existingIframe.remove();
 
-      // Yeni wrapper div-i yarat
-      const wrapper = document.createElement("div");
-      wrapper.id = "quiz-wrapper";
-
-      // Yeni iframe yaradıb wrapper-ə əlavə et
+      // Yeni iframe yaradıb container-in altında əlavə et
       const iframe = document.createElement("iframe");
       iframe.src = link;
-      iframe.id = "quiz-iframe";
+      iframe.id = "fullscreen-quiz";
       iframe.allow = "fullscreen";
       iframe.allowFullscreen = true;
       iframe.setAttribute("webkitallowfullscreen", "");
       iframe.setAttribute("mozallowfullscreen", "");
-      wrapper.appendChild(iframe);
-
-      // **Yalnız PC mühitində** avtomatik tam ekran rejiminə keç
-      if (!isiOS) {
-        if (wrapper.requestFullscreen) {
-          wrapper.requestFullscreen().catch(() => {});
-        } else if (wrapper.webkitRequestFullscreen) {
-          wrapper.webkitRequestFullscreen();
-        } else if (wrapper.msRequestFullscreen) {
-          wrapper.msRequestFullscreen();
-        }
-
-        document.addEventListener("fullscreenchange", handleExit);
-        document.addEventListener("webkitfullscreenchange", handleExit);
-        document.addEventListener("msfullscreenchange", handleExit);
-      }
-
-      // Mobil brauzerdə iframe sadəcə görünəcək, heç bir full‐screen çağırışı olmayacaq
-      document.body.appendChild(wrapper);
-    }
-
-    // Tam ekrandan çıxanda wrapper-ı sil və əsas menyuya dön
-    function handleExit() {
-      const wrapper = document.getElementById("quiz-wrapper");
-      if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
-        if (wrapper) {
-          wrapper.remove();
-          document.removeEventListener("fullscreenchange", handleExit);
-          document.removeEventListener("webkitfullscreenchange", handleExit);
-          document.removeEventListener("msfullscreenchange", handleExit);
-          showMainMenu();
-        }
-      }
+      // iframe-i bədən əvəzinə container-dan sonra əlavə edirik
+      document.body.appendChild(iframe);
+      // iOS-da da əlavə fullscreen cəhdləri olmadığı üçün bu kod sadəcə iframe-i yükləyir
     }
 
     // IP yoxlamasını səhifə yüklənəndə işə sal
