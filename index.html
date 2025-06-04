@@ -8,7 +8,7 @@
   <!-- Google Fonts: Poppins -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    /* ===== CSS Dəyişənləri (Dark/Light Mode) ===== */
+    /* ===== CSS Dəyişənləri (Dark/Light Mode üçün) ===== */
     :root {
       --bg-gradient-start: #e3f2fd;
       --bg-gradient-end: #ffffff;
@@ -234,7 +234,7 @@
       }
     }
 
-    /* ===== Iframe tərtibatı ===== */
+    /* ===== Iframe tərtibatı (default) ===== */
     iframe {
       width: 100%;
       height: 60vh;
@@ -242,6 +242,50 @@
       border-radius: 12px;
       margin-top: 24px;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    }
+
+    /* ===== iOS üçün Modal-Overlay ===== */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0,0,0,0.5);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-content {
+      position: relative;
+      width: 90vw;
+      height: 90vh;
+      background: var(--card-bg);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    }
+    .modal-content iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    .close-modal {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: #e0e0e0;
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      z-index: 10001;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     /* ===== Xəta Mesajı (Toast) ===== */
@@ -313,6 +357,7 @@
       #btn-container {
         gap: 8px;
       }
+      /* Default iframe hündürlüyü mobilde 50vh */
       iframe {
         height: 50vh;
       }
@@ -358,20 +403,20 @@
     const clickAudio = document.getElementById("clickSound");
     const toggleBtn = document.getElementById("darkToggle");
 
-    // iOS yoxlaması (amma artıq iframe proxy-ə yönələcək, blok olmayacaq)
+    // iOS yoxlaması
     const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
     // localStorage-dan son mövzunu yüklə
     document.addEventListener("DOMContentLoaded", () => {
       const lastTopic = localStorage.getItem("lastTopic");
-      // Dark mode yoxlaması
+      // Dark mode vəziyyətini yoxla
       const currentMode = localStorage.getItem("theme");
       if (currentMode === "dark") {
         document.body.classList.add("dark");
         toggleBtn.textContent = "☀️";
       }
       if (lastTopic) {
-        // Səhifə yüklənəndə azacıq gecikmə verərək əvvəlki mövzunu açırıq
+        // Azərbaycan vaxtı ilə səhifə yüklənəndə bir az gecikmə verərək əvvəlki vəziyyətə qayıt
         setTimeout(() => startQuiz(lastTopic), 800);
       }
     });
@@ -450,12 +495,13 @@
     // Əsas menyuya qayıt funksiyası
     function showMainMenu() {
       container.classList.remove('has-back', 'hidden');
-      container.innerHTML =
+      container.innerHTML = 
         '<p class="section-title">Başlanğıc mövzusu:</p>' +
         '<button class="start-btn" onclick="startQuiz(\'proqramlasdirma\')">Proqramlaşdırma</button>' +
         '<button class="start-btn" onclick="startQuiz(\'xetti\')">Xətti Cəbr</button>' +
         '<button class="start-btn" onclick="startQuiz(\'xdiak\')">XDIAK</button>' +
         '<button class="start-btn" onclick="startQuiz(\'diferensial\')">Diferensial</button>';
+      // Yenidən yeni yaradılan düymələrə ripple və audio əlavə et
       document.querySelectorAll("button").forEach(button => {
         addRippleEffect(button);
         button.addEventListener("click", () => {
@@ -465,7 +511,7 @@
       });
     }
 
-    // Mövzu seçimi funksiyası
+    // Mövzu seçimi funksiyası (fade out/in, localStorage-a yazma, düymələr animasiyası)
     function startQuiz(topic) {
       if (!userAllowed) return;
 
@@ -473,30 +519,30 @@
       const titleTextMap = {
         'proqramlasdirma': 'Proqramlaşdırma suallarını seç:',
         'xetti': 'Xətti Cəbr suallarını seç:',
-        'xdiak': 'XDİAK suallarını seç:',
+        'xdiak': 'XDIAK suallarını seç:',
         'diferensial': 'Diferensial suallarını seç:'
       };
       const linksMap = {
         'proqramlasdirma': [
-          "683dddfd79bab9c70d96170f",
-          "683dde151f8214ac74f7703d",
-          "683dde314708a5aad48cb67f"
+          "https://quizizz.com/embed/quiz/683dddfd79bab9c70d96170f",
+          "https://quizizz.com/embed/quiz/683dde151f8214ac74f7703d",
+          "https://quizizz.com/embed/quiz/683dde314708a5aad48cb67f"
         ],
         'xetti': [
-          "683f58989ba449e01c456667",
-          "683f58af9413297320bc29f1",
-          "683f58c21258dca9091f1082"
+          "https://quizizz.com/embed/quiz/683f58989ba449e01c456667",
+          "https://quizizz.com/embed/quiz/683f58af9413297320bc29f1",
+          "https://quizizz.com/embed/quiz/683f58c21258dca9091f1082"
         ],
         'xdiak': [
-          "683f5cf4c777386684e14481",
-          "683f5d1279bab9c70d96c2b5",
-          "683f5d2eeee6434cec6396e2",
-          "683f5d50eee6434cec6396e7"
+          "https://quizizz.com/embed/quiz/683f5cf4c777386684e14481",
+          "https://quizizz.com/embed/quiz/683f5d1279bab9c70d96c2b5",
+          "https://quizizz.com/embed/quiz/683f5d2eeee6434cec6396e2",
+          "https://quizizz.com/embed/quiz/683f5d50eee6434cec6396e7"
         ],
         'diferensial': [
-          "683f60a44708a5aad48d66d1",
-          "683f60b29413297320bc2baf",
-          "683f60d33740abec43503e14"
+          "https://quizizz.com/embed/quiz/683f60a44708a5aad48d66d1",
+          "https://quizizz.com/embed/quiz/683f60b29413297320bc2baf",
+          "https://quizizz.com/embed/quiz/683f60d33740abec43503e14"
         ]
       };
       const labelsMap = {
@@ -506,33 +552,35 @@
         'diferensial': ["1-100", "101-205", "206-301"]
       };
 
+      // Fade out container
       container.classList.add("hidden");
       setTimeout(() => {
         container.classList.remove("has-back", "hidden");
         container.classList.add("has-back");
-        container.innerHTML =
+        container.innerHTML = 
           '<button class="back-btn" onclick="showMainMenu()">‹ Geri</button>' +
           '<p class="section-title">' + (titleTextMap[topic] || 'Bölmə tapılmadı') + '</p>';
 
+        // Düymələri yarat
         const btnContainer = document.createElement("div");
         btnContainer.id = "btn-container";
 
         const links = linksMap[topic] || [];
         const labels = labelsMap[topic] || [];
 
-        links.forEach((quizId, index) => {
+        links.forEach((link, index) => {
           const btn = document.createElement("button");
           btn.className = "quiz-btn";
           btn.textContent = labels[index];
-          // Burada əvvəlki “link”: “https://quizizz.com/embed/quiz/…” əvəzinə
-          // proxy endpoint istifadə edirik:
-          btn.onclick = () => openQuizViaProxy(quizId);
+          btn.onclick = () => openQuiz(link);
           btnContainer.appendChild(btn);
         });
         container.appendChild(btnContainer);
 
+        // Fade in container
         setTimeout(() => container.classList.remove("hidden"), 50);
 
+        // Yeni yaradılan button-lara ripple və audio əlavə et
         const newButtons = container.querySelectorAll("button");
         newButtons.forEach(button => {
           addRippleEffect(button);
@@ -544,25 +592,73 @@
       }, 300);
     }
 
-    // Quiz-i proxy vasitəsilə in-page iframe-də açan funksiya
-    function openQuizViaProxy(quizId) {
-      // Əvvəlki iframe varsa sil
-      const existingIframe = document.getElementById("quiz-iframe");
+    // Quiz-i iframe-də açan funksiya
+    function openQuiz(link) {
+      // Əvvəlki iframe və modal varsa sil
+      const existingModal = document.getElementById("modal-overlay");
+      if (existingModal) existingModal.remove();
+      const existingIframe = document.getElementById("fullscreen-quiz");
       if (existingIframe) existingIframe.remove();
 
-      // Yeni iframe yaradıb body-ə əlavə et
-      const iframe = document.createElement("iframe");
-      // Proxy URL-i: localhost:3000/quiz-proxy/<quizId>
-      // Düzgün işləməsi üçün serverinizin domain-i buraya gələcək,
-      // misal üçün: https://sizinsayt.com/quiz-proxy/<quizId>
-      iframe.src = `http://localhost:3000/quiz-proxy/${quizId}`;
-      iframe.id = "quiz-iframe";
-      iframe.allow = "fullscreen";
-      iframe.allowFullscreen = true;
-      iframe.setAttribute("webkitallowfullscreen", "");
-      iframe.setAttribute("mozallowfullscreen", "");
+      if (isiOS) {
+        // iOS üçün: modal-overlay yaradıb iframe-i ora əlavə et
+        const overlay = document.createElement("div");
+        overlay.id = "modal-overlay";
+        overlay.className = "modal-overlay";
 
-      document.body.appendChild(iframe);
+        const modal = document.createElement("div");
+        modal.className = "modal-content";
+
+        // Bağlama düyməsi
+        const closeBtn = document.createElement("button");
+        closeBtn.className = "close-modal";
+        closeBtn.innerHTML = "✕";
+        closeBtn.onclick = () => {
+          document.body.removeChild(overlay);
+        };
+
+        // İframe-i modal-ın içinə qoy
+        const iframe = document.createElement("iframe");
+        iframe.src = link;
+        iframe.allow = "fullscreen";
+        iframe.allowFullscreen = true;
+        iframe.setAttribute("webkitallowfullscreen", "");
+        iframe.setAttribute("mozallowfullscreen", "");
+
+        modal.appendChild(closeBtn);
+        modal.appendChild(iframe);
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+      } else {
+        // PC/desktop və digər brauzerlər üçün: requestFullscreen istifadə et
+        const iframe = document.createElement("iframe");
+        iframe.src = link;
+        iframe.id = "fullscreen-quiz";
+        iframe.allow = "fullscreen";
+        iframe.allowFullscreen = true;
+        iframe.setAttribute("webkitallowfullscreen", "");
+        iframe.setAttribute("mozallowfullscreen", "");
+        document.body.appendChild(iframe);
+
+        if (iframe.requestFullscreen) iframe.requestFullscreen();
+        else if (iframe.webkitRequestFullscreen) iframe.webkitRequestFullscreen();
+        else if (iframe.msRequestFullscreen) iframe.msRequestFullscreen();
+
+        document.addEventListener("fullscreenchange", handleExit);
+        document.addEventListener("webkitfullscreenchange", handleExit);
+        document.addEventListener("msfullscreenchange", handleExit);
+      }
+    }
+
+    // Tam ekrandan çıxış (fullscreen) – yalnız PC üçün
+    function handleExit() {
+      const iframe = document.getElementById("fullscreen-quiz");
+      if (!document.fullscreenElement && iframe) {
+        iframe.remove();
+        document.removeEventListener("fullscreenchange", handleExit);
+        document.removeEventListener("webkitfullscreenchange", handleExit);
+        document.removeEventListener("msfullscreenchange", handleExit);
+      }
     }
 
     // IP yoxlamasını səhifə yüklənəndə işə sal
