@@ -234,7 +234,7 @@
       }
     }
 
-    /* ===== Iframe tərtibatı (default) ===== */
+    /* ===== Iframe tərtibatı ===== */
     iframe {
       width: 100%;
       height: 60vh;
@@ -242,50 +242,6 @@
       border-radius: 12px;
       margin-top: 24px;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-    }
-
-    /* ===== iOS üçün Modal-Overlay ===== */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background-color: rgba(0,0,0,0.5);
-      z-index: 10000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .modal-content {
-      position: relative;
-      width: 90vw;
-      height: 90vh;
-      background: var(--card-bg);
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-    }
-    .modal-content iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-    .close-modal {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background: #e0e0e0;
-      border: none;
-      border-radius: 50%;
-      width: 32px;
-      height: 32px;
-      font-size: 1.2rem;
-      cursor: pointer;
-      z-index: 10001;
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
 
     /* ===== Xəta Mesajı (Toast) ===== */
@@ -357,7 +313,6 @@
       #btn-container {
         gap: 8px;
       }
-      /* Default iframe hündürlüyü mobilde 50vh */
       iframe {
         height: 50vh;
       }
@@ -472,9 +427,9 @@
         const size = Math.max(rect.width, rect.height);
         const x = e.clientX - rect.left - size / 2;
         const y = e.clientY - rect.top - size / 2;
-        circle.style.width = circle.style.height = size + 'px';
-        circle.style.left = x + 'px';
-        circle.style.top = y + 'px';
+        circle.style.width = circle.style.height = `${size}px`;
+        circle.style.left = `${x}px`;
+        circle.style.top = `${y}px`;
         circle.classList.add("ripple");
         const ripple = btn.getElementsByClassName("ripple")[0];
         if (ripple) ripple.remove();
@@ -495,12 +450,13 @@
     // Əsas menyuya qayıt funksiyası
     function showMainMenu() {
       container.classList.remove('has-back', 'hidden');
-      container.innerHTML = 
-        '<p class="section-title">Başlanğıc mövzusu:</p>' +
-        '<button class="start-btn" onclick="startQuiz(\'proqramlasdirma\')">Proqramlaşdırma</button>' +
-        '<button class="start-btn" onclick="startQuiz(\'xetti\')">Xətti Cəbr</button>' +
-        '<button class="start-btn" onclick="startQuiz(\'xdiak\')">XDIAK</button>' +
-        '<button class="start-btn" onclick="startQuiz(\'diferensial\')">Diferensial</button>';
+      container.innerHTML = `
+        <p class="section-title">Başlanğıc mövzusu:</p>
+        <button class="start-btn" onclick="startQuiz('proqramlasdirma')">Proqramlaşdırma</button>
+        <button class="start-btn" onclick="startQuiz('xetti')">Xətti Cəbr</button>
+        <button class="start-btn" onclick="startQuiz('xdiak')">XDIAK</button>
+        <button class="start-btn" onclick="startQuiz('diferensial')">Diferensial</button>
+      `;
       // Yenidən yeni yaradılan düymələrə ripple və audio əlavə et
       document.querySelectorAll("button").forEach(button => {
         addRippleEffect(button);
@@ -557,9 +513,10 @@
       setTimeout(() => {
         container.classList.remove("has-back", "hidden");
         container.classList.add("has-back");
-        container.innerHTML = 
-          '<button class="back-btn" onclick="showMainMenu()">‹ Geri</button>' +
-          '<p class="section-title">' + (titleTextMap[topic] || 'Bölmə tapılmadı') + '</p>';
+        container.innerHTML = `
+          <button class="back-btn" onclick="showMainMenu()">‹ Geri</button>
+          <p class="section-title">${titleTextMap[topic] || 'Bölmə tapılmadı'}</p>
+        `;
 
         // Düymələri yarat
         const btnContainer = document.createElement("div");
@@ -594,63 +551,33 @@
 
     // Quiz-i iframe-də açan funksiya
     function openQuiz(link) {
-      // Əvvəlki iframe və modal varsa sil
-      const existingModal = document.getElementById("modal-overlay");
-      if (existingModal) existingModal.remove();
+      // Əvvəlki iframe-i sil
       const existingIframe = document.getElementById("fullscreen-quiz");
       if (existingIframe) existingIframe.remove();
 
-      if (isiOS) {
-        // iOS üçün: modal-overlay yaradıb iframe-i ora əlavə et
-        const overlay = document.createElement("div");
-        overlay.id = "modal-overlay";
-        overlay.className = "modal-overlay";
+      // Yeni iframe yaradıb bədənə əlavə et
+      const iframe = document.createElement("iframe");
+      iframe.src = link;
+      iframe.id = "fullscreen-quiz";
+      iframe.allow = "fullscreen";
+      iframe.allowFullscreen = true;
+      iframe.setAttribute("webkitallowfullscreen", "");
+      iframe.setAttribute("mozallowfullscreen", "");
+      document.body.appendChild(iframe);
 
-        const modal = document.createElement("div");
-        modal.className = "modal-content";
-
-        // Bağlama düyməsi
-        const closeBtn = document.createElement("button");
-        closeBtn.className = "close-modal";
-        closeBtn.innerHTML = "✕";
-        closeBtn.onclick = () => {
-          document.body.removeChild(overlay);
-        };
-
-        // İframe-i modal-ın içinə qoy
-        const iframe = document.createElement("iframe");
-        iframe.src = link;
-        iframe.allow = "fullscreen";
-        iframe.allowFullscreen = true;
-        iframe.setAttribute("webkitallowfullscreen", "");
-        iframe.setAttribute("mozallowfullscreen", "");
-
-        modal.appendChild(closeBtn);
-        modal.appendChild(iframe);
-        overlay.appendChild(modal);
-        document.body.appendChild(overlay);
-      } else {
-        // PC/desktop və digər brauzerlər üçün: requestFullscreen istifadə et
-        const iframe = document.createElement("iframe");
-        iframe.src = link;
-        iframe.id = "fullscreen-quiz";
-        iframe.allow = "fullscreen";
-        iframe.allowFullscreen = true;
-        iframe.setAttribute("webkitallowfullscreen", "");
-        iframe.setAttribute("mozallowfullscreen", "");
-        document.body.appendChild(iframe);
-
+      // Tam ekran (iOS-da bloklanmaya görə yoxlanır)
+      if (!isiOS) {
         if (iframe.requestFullscreen) iframe.requestFullscreen();
         else if (iframe.webkitRequestFullscreen) iframe.webkitRequestFullscreen();
         else if (iframe.msRequestFullscreen) iframe.msRequestFullscreen();
-
-        document.addEventListener("fullscreenchange", handleExit);
-        document.addEventListener("webkitfullscreenchange", handleExit);
-        document.addEventListener("msfullscreenchange", handleExit);
       }
+
+      document.addEventListener("fullscreenchange", handleExit);
+      document.addEventListener("webkitfullscreenchange", handleExit);
+      document.addEventListener("msfullscreenchange", handleExit);
     }
 
-    // Tam ekrandan çıxış (fullscreen) – yalnız PC üçün
+    // Tam ekrandan çıxış
     function handleExit() {
       const iframe = document.getElementById("fullscreen-quiz");
       if (!document.fullscreenElement && iframe) {
