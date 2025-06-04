@@ -2,10 +2,13 @@
 <html lang="az">
 <head>
   <meta charset="UTF-8">
+  <!-- Mobil cihazlarda düzgün miqyas üçün metatag -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kenoo</title>
+  <!-- Google Fonts: Poppins -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
+    /* ===== CSS Dəyişənləri (Dark/Light Mode üçün) ===== */
     :root {
       --bg-gradient-start: #e3f2fd;
       --bg-gradient-end: #ffffff;
@@ -33,6 +36,7 @@
       --toast-text: #fff;
     }
 
+    /* ===== Ümumi Tərtibat ===== */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -71,6 +75,7 @@
       50% { border-color: transparent; }
     }
 
+    /* ===== Loading Spinner ===== */
     #loader {
       position: fixed;
       top: 0;
@@ -100,6 +105,7 @@
       to { transform: rotate(360deg); }
     }
 
+    /* ===== Container & Fade-In/Fade-Out ===== */
     #container {
       width: 100%;
       max-width: 600px;
@@ -125,6 +131,7 @@
       margin-bottom: 16px;
     }
 
+    /* ===== “Geri” Düyməsi ===== */
     .back-btn {
       position: absolute;
       top: 16px;
@@ -147,6 +154,7 @@
       padding-top: 50px;
     }
 
+    /* ===== Başlanğıc Düymələri ===== */
     .start-btn {
       position: relative;
       padding: 14px 28px;
@@ -168,6 +176,7 @@
       transform: scale(1.03);
     }
 
+    /* ===== Quiz Seçim Düymələri ===== */
     #btn-container {
       display: flex;
       flex-wrap: wrap;
@@ -207,6 +216,7 @@
       box-shadow: 0 6px 16px rgba(255, 183, 77, 0.5);
     }
 
+    /* ===== Ripple Effekti ===== */
     button {
       overflow: hidden;
     }
@@ -224,6 +234,7 @@
       }
     }
 
+    /* ===== Iframe tərtibatı (default) ===== */
     iframe {
       width: 100%;
       height: 60vh;
@@ -233,6 +244,7 @@
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
     }
 
+    /* ===== iOS üçün Modal-Overlay ===== */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -276,6 +288,7 @@
       justify-content: center;
     }
 
+    /* ===== Xəta Mesajı (Toast) ===== */
     #toast {
       position: fixed;
       bottom: 20px;
@@ -295,6 +308,10 @@
       opacity: 1;
     }
 
+    /* ===== Audio (gizli) ===== */
+    /* click.mp3 faylını layihə qovluğuna yerləşdirməlisiniz */
+
+    /* ===== Dark Mode Toggle Düyməsi ===== */
     .dark-toggle {
       position: fixed;
       top: 16px;
@@ -316,6 +333,7 @@
       background-color: rgba(0,0,0,0.1);
     }
 
+    /* ===== Mobil optimallaşdırma ===== */
     @media (max-width: 600px) {
       body {
         padding: 10px;
@@ -339,6 +357,7 @@
       #btn-container {
         gap: 8px;
       }
+      /* Default iframe hündürlüyü mobilde 50vh */
       iframe {
         height: 50vh;
       }
@@ -346,16 +365,21 @@
   </style>
 </head>
 <body>
+  <!-- Loading Spinner -->
   <div id="loader">
     <div class="spinner"></div>
   </div>
 
+  <!-- Dark Mode Toggle -->
   <button id="darkToggle" class="dark-toggle">🌙</button>
 
+  <!-- Başlıq (Typing Effect) -->
   <h1>Quiz Mövzularını Seçin</h1>
 
-  <div id="toast">REDDOLL!!!</div>
+  <!-- Toast Bildiriş -->
+  <div id="toast">Sizin IP icazəli deyil!</div>
 
+  <!-- Əsas Kontent -->
   <div id="container">
     <p class="section-title">Başlanğıc mövzusu:</p>
     <button class="start-btn" onclick="startQuiz('proqramlasdirma')">Proqramlaşdırma</button>
@@ -364,6 +388,7 @@
     <button class="start-btn" onclick="startQuiz('diferensial')">Diferensial</button>
   </div>
 
+  <!-- Click Sound (Audio) -->
   <audio id="clickSound" src="click.mp3" preload="auto"></audio>
 
   <script>
@@ -378,25 +403,31 @@
     const clickAudio = document.getElementById("clickSound");
     const toggleBtn = document.getElementById("darkToggle");
 
+    // iOS yoxlaması
     const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
+    // localStorage-dan son mövzunu yüklə
     document.addEventListener("DOMContentLoaded", () => {
       const lastTopic = localStorage.getItem("lastTopic");
+      // Dark mode vəziyyətini yoxla
       const currentMode = localStorage.getItem("theme");
       if (currentMode === "dark") {
         document.body.classList.add("dark");
         toggleBtn.textContent = "☀️";
       }
       if (lastTopic) {
+        // Azərbaycan vaxtı ilə səhifə yüklənəndə bir az gecikmə verərək əvvəlki vəziyyətə qayıt
         setTimeout(() => startQuiz(lastTopic), 800);
       }
     });
 
+    // Səhifə tam yüklənəndə loader-i gizlət
     window.addEventListener("load", () => {
       loader.classList.add("hidden");
       setTimeout(() => loader.style.display = "none", 300);
     });
 
+    // IP yoxlaması
     async function checkIP() {
       try {
         const res = await fetch('https://api.ipify.org?format=json');
@@ -412,6 +443,7 @@
       }
     }
 
+    // Toast göstərən funksiya
     function showToast(message) {
       toast.textContent = message;
       toast.classList.add("show");
@@ -420,6 +452,7 @@
       }, 3000);
     }
 
+    // Dark mode toggle funksiyası
     toggleBtn.addEventListener("click", () => {
       document.body.classList.toggle("dark");
       if (document.body.classList.contains("dark")) {
@@ -431,6 +464,7 @@
       }
     });
 
+    // Ripple effekti əlavə et
     function addRippleEffect(btn) {
       btn.addEventListener("click", function(e) {
         const rect = btn.getBoundingClientRect();
@@ -447,6 +481,7 @@
         btn.appendChild(circle);
       });
     }
+    // Bütün düymələrə ripple effekti və audio əlavə et
     document.addEventListener("DOMContentLoaded", () => {
       document.querySelectorAll("button").forEach(button => {
         addRippleEffect(button);
@@ -457,6 +492,7 @@
       });
     });
 
+    // Əsas menyuya qayıt funksiyası
     function showMainMenu() {
       container.classList.remove('has-back', 'hidden');
       container.innerHTML = 
@@ -465,6 +501,7 @@
         '<button class="start-btn" onclick="startQuiz(\'xetti\')">Xətti Cəbr</button>' +
         '<button class="start-btn" onclick="startQuiz(\'xdiak\')">XDIAK</button>' +
         '<button class="start-btn" onclick="startQuiz(\'diferensial\')">Diferensial</button>';
+      // Yenidən yeni yaradılan düymələrə ripple və audio əlavə et
       document.querySelectorAll("button").forEach(button => {
         addRippleEffect(button);
         button.addEventListener("click", () => {
@@ -474,6 +511,7 @@
       });
     }
 
+    // Mövzu seçimi funksiyası (fade out/in, localStorage-a yazma, düymələr animasiyası)
     function startQuiz(topic) {
       if (!userAllowed) return;
 
@@ -514,6 +552,7 @@
         'diferensial': ["1-100", "101-205", "206-301"]
       };
 
+      // Fade out container
       container.classList.add("hidden");
       setTimeout(() => {
         container.classList.remove("has-back", "hidden");
@@ -522,6 +561,7 @@
           '<button class="back-btn" onclick="showMainMenu()">‹ Geri</button>' +
           '<p class="section-title">' + (titleTextMap[topic] || 'Bölmə tapılmadı') + '</p>';
 
+        // Düymələri yarat
         const btnContainer = document.createElement("div");
         btnContainer.id = "btn-container";
 
@@ -537,8 +577,10 @@
         });
         container.appendChild(btnContainer);
 
+        // Fade in container
         setTimeout(() => container.classList.remove("hidden"), 50);
 
+        // Yeni yaradılan button-lara ripple və audio əlavə et
         const newButtons = container.querySelectorAll("button");
         newButtons.forEach(button => {
           addRippleEffect(button);
@@ -550,14 +592,16 @@
       }, 300);
     }
 
+    // Quiz-i iframe-də açan funksiya
     function openQuiz(link) {
+      // Əvvəlki iframe və modal varsa sil
       const existingModal = document.getElementById("modal-overlay");
       if (existingModal) existingModal.remove();
       const existingIframe = document.getElementById("fullscreen-quiz");
       if (existingIframe) existingIframe.remove();
 
       if (isiOS) {
-
+        // iOS üçün: modal-overlay yaradıb iframe-i ora əlavə et
         const overlay = document.createElement("div");
         overlay.id = "modal-overlay";
         overlay.className = "modal-overlay";
@@ -565,7 +609,7 @@
         const modal = document.createElement("div");
         modal.className = "modal-content";
 
-
+        // Bağlama düyməsi
         const closeBtn = document.createElement("button");
         closeBtn.className = "close-modal";
         closeBtn.innerHTML = "✕";
@@ -573,6 +617,7 @@
           document.body.removeChild(overlay);
         };
 
+        // İframe-i modal-ın içinə qoy
         const iframe = document.createElement("iframe");
         iframe.src = link;
         iframe.allow = "fullscreen";
@@ -585,7 +630,7 @@
         overlay.appendChild(modal);
         document.body.appendChild(overlay);
       } else {
-
+        // PC/desktop və digər brauzerlər üçün: requestFullscreen istifadə et
         const iframe = document.createElement("iframe");
         iframe.src = link;
         iframe.id = "fullscreen-quiz";
@@ -605,6 +650,7 @@
       }
     }
 
+    // Tam ekrandan çıxış (fullscreen) – yalnız PC üçün
     function handleExit() {
       const iframe = document.getElementById("fullscreen-quiz");
       if (!document.fullscreenElement && iframe) {
@@ -615,6 +661,7 @@
       }
     }
 
+    // IP yoxlamasını səhifə yüklənəndə işə sal
     window.onload = checkIP;
   </script>
 </body>
